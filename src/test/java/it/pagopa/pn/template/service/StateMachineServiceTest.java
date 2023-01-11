@@ -9,7 +9,7 @@ class StateMachineServiceTest {
 
     @Test
     void testQueryTableOK() {
-        Response result = stateMachineService.queryTable("INVIO_PEC#C050", "BOOKED", "VALIDATE");
+        Response result = stateMachineService.queryTable("INVIO_PEC", "BOOKED", "C050","VALIDATE");
         Response resp = new Response();
         resp.setAllowed(true);
 
@@ -17,11 +17,12 @@ class StateMachineServiceTest {
     }
     @Test
     void testQueryTableError() {
-        Response result = stateMachineService.queryTable("INVIO_PEC#C050", "BOOKED", "ERROR");
+        Response result = stateMachineService.queryTable("INVIO_PEC", "BOOKED","C050", "ERROR");
         Response resp = new Response();
 
 
         Assertions.assertEquals(resp.isAllowed(), result.isAllowed());
     }
+
 }
 

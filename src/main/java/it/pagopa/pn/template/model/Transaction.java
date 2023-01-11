@@ -13,7 +13,7 @@ public class Transaction {
     private String currStatus;
     private List<String> targetStatus;
 
-    boolean allowed = false;
+
 
 
     @DynamoDbPartitionKey
@@ -43,22 +43,12 @@ public class Transaction {
     }
 
 
-
-    public boolean isAllowed() {
-        return allowed;
-    }
-
-    public void setAllowed(boolean allowed) {
-        allowed = allowed;
-    }
-
     @Override
     public String toString() {
         return "Transaction{" +
                 "processClientId='" + processClientId + '\'' +
                 ", currStatus='" + currStatus + '\'' +
                 ", targetStatus='" + targetStatus + '\'' +
-                ", allowed='" + allowed + '\'' +
                 '}';
     }
 }

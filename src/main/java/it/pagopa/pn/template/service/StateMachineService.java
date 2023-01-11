@@ -19,17 +19,20 @@ public class StateMachineService {
     public StateMachineService() {
 
     }
+    public static final String SEPARATORE = "#";
 
 
-    public Response queryTable(String partition_id, String sort_id ,String nextStatus) {
+    public Response queryTable(String partition_id, String sort_id ,String clientId,String nextStatus) {
         Response resp = new Response();
+        Transaction processClientId =  new Transaction();
+        processClientId.setProcessClientId(partition_id + SEPARATORE +clientId);
         try {
             DynamoDbEnhancedClient enhancedClient = DependencyFactory.dynamoDbEnhancedClient();
 
             DynamoDbTable<Transaction> transactionTable = enhancedClient.table("Transaction", TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
-                            .partitionValue(partition_id).sortValue(sort_id)
+                            .partitionValue(processClientId.getProcessClientId()).sortValue(sort_id)
                             .build());
 
             // Get items in the table and write out the ID value.
@@ -41,12 +44,14 @@ public class StateMachineService {
                 Transaction rec = results.next();
                 result.add(rec);
                 System.out.println("The process of the movie is "+rec.getProcessClientId());
+                System.out.println("The reqeust status to validate  is "+nextStatus);
                 System.out.println("The target status information  is "+rec.getTargetStatus());
+
             }
 
             if(result.get(0).getTargetStatus().contains(nextStatus)){
                 resp.setAllowed(true);
-                result.get(0).setAllowed(resp.isAllowed());
+//                result.get(0).setAllowed(resp.isAllowed());
             }
 
             return resp;
@@ -54,8 +59,7 @@ public class StateMachineService {
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
-            resp.setAllowed(false);
-            return null;
+            return resp;
         }
     }
 

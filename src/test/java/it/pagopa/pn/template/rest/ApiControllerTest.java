@@ -20,7 +20,7 @@ class ApiControllerTest {
     @Test
     void testValidateStatusOK() throws Exception {
 
-        Response result = apiController.validateStatus("INVIO_PEC#C050", "BOOKED", "VALIDATE");
+        Response result = apiController.validateStatus("INVIO_PEC", "BOOKED", "C050","VALIDATE");
         Response resp = new Response();
         resp.setAllowed(true);
         Assertions.assertEquals(resp.isAllowed() , result.isAllowed());
@@ -29,7 +29,7 @@ class ApiControllerTest {
     @Test
     void testValidateStatusErrror() throws Exception {
 
-        Response result = apiController.validateStatus("INVIO_PEC#C050", "BOOKED", "ERROR");
+        Response result = apiController.validateStatus("INVIO_PEC", "BOOKED","C050", "ERROR");
         Response resp = new Response();
         Assertions.assertEquals(resp.isAllowed() , result.isAllowed());
     }
