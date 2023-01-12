@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.factory;
+package it.pagopa.pn.statemachinemanager.factory;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;

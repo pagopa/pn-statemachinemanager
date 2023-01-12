@@ -1,7 +1,7 @@
-package it.pagopa.pn.template.rest;
+package it.pagopa.pn.statemachinemanager.rest;
 
-import it.pagopa.pn.template.model.Response;
-import it.pagopa.pn.template.service.StateMachineService;
+import it.pagopa.pn.statemachinemanager.model.Response;
+import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import org.springframework.web.bind.annotation.*;
 
 
