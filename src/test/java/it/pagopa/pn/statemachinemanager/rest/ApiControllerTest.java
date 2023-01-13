@@ -1,11 +1,9 @@
-package it.pagopa.pn.template.rest;
+package it.pagopa.pn.statemachinemanager.rest;
 
-import it.pagopa.pn.template.model.Response;
-import org.junit.jupiter.api.AfterAll;
+import it.pagopa.pn.statemachinemanager.model.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
 class ApiControllerTest {

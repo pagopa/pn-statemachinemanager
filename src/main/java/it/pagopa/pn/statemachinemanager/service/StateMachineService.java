@@ -1,8 +1,8 @@
-package it.pagopa.pn.template.service;
+package it.pagopa.pn.statemachinemanager.service;
 
-import it.pagopa.pn.template.factory.DependencyFactory;
-import it.pagopa.pn.template.model.Response;
-import it.pagopa.pn.template.model.Transaction;
+import it.pagopa.pn.statemachinemanager.factory.DependencyFactory;
+import it.pagopa.pn.statemachinemanager.model.Response;
+import it.pagopa.pn.statemachinemanager.model.Transaction;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
