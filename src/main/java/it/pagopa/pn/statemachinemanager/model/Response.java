@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.model;
+package it.pagopa.pn.statemachinemanager.model;
 
 public class Response {
     boolean Allowed =false;

@@ -1,6 +1,6 @@
-package it.pagopa.pn.template.service;
+package it.pagopa.pn.statemachinemanager.service;
 
-import it.pagopa.pn.template.model.Response;
+import it.pagopa.pn.statemachinemanager.model.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

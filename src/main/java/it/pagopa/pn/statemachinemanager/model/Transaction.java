@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.model;
+package it.pagopa.pn.statemachinemanager.model;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
