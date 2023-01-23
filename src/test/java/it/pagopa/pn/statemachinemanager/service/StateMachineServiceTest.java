@@ -7,11 +7,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -20,57 +21,63 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @AutoConfigureWebTestClient
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StateMachineServiceTest {
-    StateMachineService stateMachineService = new StateMachineService();
 
-//    @Test
-//    void testQueryTableOK() {
-//        Response result = stateMachineService.queryTable("INVIO_PEC", "BOOKED", "C050","VALIDATE");
-//        Response resp = new Response();
-//        resp.setAllowed(true);
-//
-//        Assertions.assertEquals(resp.isAllowed(), result.isAllowed());
-//    }
-//    @Test
-//    void testQueryTableError() {
-//        Response result = stateMachineService.queryTable("INVIO_PEC", "BOOKED","C050", "ERROR");
-//        Response resp = new Response();
-//
-//
-//        Assertions.assertEquals(resp.isAllowed(), result.isAllowed());
-//    }
 
     @Autowired
     private WebTestClient webClient;
 
-    //ECGRAC.100.1
+
+    @Autowired
+    DynamoDbEnhancedClient enhancedClient;
+
+
+    @BeforeEach
+    void setUp (){
+        try {
+            DynamoDbTable<Transaction> custTable = enhancedClient.table("Transaction", TableSchema.fromBean(Transaction.class));
+
+
+            // Populate the Table.
+            List<String> list = new ArrayList<>();
+            list.add("VALIDATE");
+            Transaction transaction = new Transaction();
+
+            transaction.setProcessClientId("INVIO_PEC#C050");
+            transaction.setCurrStatus("BOOKED");
+            transaction.setTargetStatus(list);
+
+            // Put the customer data into an Amazon DynamoDB table.
+            custTable.putItem(transaction);
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        System.out.println("Customer data added to the table with id id101");
+    }
+
     @Test
     @Order(1)
-    void insertTransactionTest() {
-
-        Transaction transaction = new Transaction();
-        ArrayList<String> listArray = new ArrayList<>();
-        listArray.add("VALIDATE");
-        transaction.setProcessClientId("INVIO_PEC#C050");
-        transaction.setCurrStatus("BOOKED");
-        transaction.setTargetStatus(listArray);
-
-
-        webClient.post()
-                .uri("http://localhost:8080/")
-                .accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON)
-                .body(BodyInserters.fromValue(transaction))
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
-    @Test
-    @Order(2)
     void getStatusTest() {
         String process = "INVIO_PEC";
         String currStato = "BOOKED";
         String clientId = "C050";
         String nextStatus = "VALIDATE";
+        webClient.get()
+                .uri("http://localhost:8080/validate/"+process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Response.class);
+    }
+    @Test
+    @Order(2)
+    void getStatusTestKO() {
+        String process = "INVIO_PEC";
+        String currStato = "BOOKED";
+        String clientId = "C050";
+        String nextStatus = "COMPOSED";
         webClient.get()
                 .uri("http://localhost:8080/validate/"+process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
                 .accept(APPLICATION_JSON)
