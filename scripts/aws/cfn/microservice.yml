@@ -95,7 +95,7 @@ Resources:
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'PnSmmTableClientStates=${PnSmmTableNameClientStates}'
-        MappedPaths: '/state-machine-manager/*'
+        MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
@@ -111,7 +111,6 @@ Resources:
     Properties:
       Description: "String"
       ManagedPolicyName: !Ref PnSsmManagedPolicyName
-      Path: "String"
       PolicyDocument: 
         Version: 2012-10-17
         Statement:
