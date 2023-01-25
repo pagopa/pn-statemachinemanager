@@ -31,9 +31,11 @@ public class AwsConfiguration {
     @Value("${aws.dynamodb.test.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
 
+    @Value("${AWS_REGIONCODE}")
+    String awsRegionCode;
     @Bean
     public SqsClient getSqsClient() {
-        SqsClientBuilder sqsClientBuilder = SqsClient.builder()
+        SqsClientBuilder sqsClientBuilder = SqsClient.builder().region(Region.of(awsRegionCode))
                 .credentialsProvider(DefaultCredentialsProvider.create());
 
         if (sqsLocalStackEndpoint != null) {
@@ -45,7 +47,7 @@ public class AwsConfiguration {
 
     @Bean
     public DynamoDbClient getDynamoDbClient() {
-        DynamoDbClientBuilder dynamoDbClientBuilder = DynamoDbClient.builder()
+        DynamoDbClientBuilder dynamoDbClientBuilder = DynamoDbClient.builder().region(Region.of(awsRegionCode))
                 .credentialsProvider(DefaultCredentialsProvider.create());
 
         if (dynamoDbLocalStackEndpoint != null) {

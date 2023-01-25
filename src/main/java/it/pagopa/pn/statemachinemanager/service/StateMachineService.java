@@ -2,6 +2,7 @@ package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -18,9 +19,15 @@ import java.util.List;
 public class StateMachineService {
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+
+    @Value("${PnSmmTableClientStates}")
+    String pnSmmTableClientStates;
+
+
     public StateMachineService(DynamoDbEnhancedClient dynamoDbEnhancedClient) {
 
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
+        this.pnSmmTableClientStates = pnSmmTableClientStates;
     }
     public static final String SEPARATORE = "#";
 
@@ -31,8 +38,7 @@ public class StateMachineService {
         processClientId.setProcessClientId(partition_id + SEPARATORE +clientId);
         try {
 
-
-            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table("Transaction", TableSchema.fromBean(Transaction.class));
+            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
                             .partitionValue(processClientId.getProcessClientId()).sortValue(sort_id)

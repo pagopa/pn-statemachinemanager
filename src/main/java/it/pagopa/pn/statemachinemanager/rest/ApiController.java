@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@RequestMapping("/state-machine-manager")
 public class ApiController  {
 
 
@@ -15,7 +16,7 @@ public class ApiController  {
         this.service = service;
     }
 
-    @GetMapping(value="/validate/{process}/{status}")
+    @GetMapping(path="/validate/{process}/{status}")
     public Response validateStatus(@PathVariable("process") String process, @PathVariable("status") String status, @RequestParam(value = "clientId") String clientId,@RequestParam(value = "nextStatus") String nextStatus) throws Exception{
         Response result = service.queryTable(process, status,clientId,nextStatus);
         System.out.println("RESULT=" + result.isAllowed());

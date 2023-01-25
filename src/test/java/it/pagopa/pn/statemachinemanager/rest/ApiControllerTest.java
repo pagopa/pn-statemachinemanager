@@ -7,11 +7,9 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.util.ArrayList;
@@ -67,7 +65,7 @@ class ApiControllerTest {
         String clientId = "C050";
         String nextStatus = "VALIDATE";
         webClient.get()
-                .uri("http://localhost:8080/validate/"+process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .uri("http://localhost:8080/state-machine-manager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -82,7 +80,7 @@ class ApiControllerTest {
         String clientId = "C050";
         String nextStatus = "COMPOSED";
         webClient.get()
-                .uri("http://localhost:8080/validate/"+process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .uri("http://localhost:8080/state-machine-manager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
