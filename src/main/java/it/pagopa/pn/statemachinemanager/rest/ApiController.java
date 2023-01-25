@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/state-machine-manager")
+@RequestMapping("/statemachinemanager")
 public class ApiController  {
 
 

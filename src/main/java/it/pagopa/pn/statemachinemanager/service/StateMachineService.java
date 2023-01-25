@@ -20,7 +20,7 @@ public class StateMachineService {
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    @Value("${PnSmmTableClientState}")
+    @Value("${PnSmmTableClientStates}")
     String pnSmmTableClientStates;
 
 
