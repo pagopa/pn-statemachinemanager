@@ -31,7 +31,7 @@ public class AwsConfiguration {
     @Value("${aws.dynamodb.test.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
 
-    @Value("${AWS_REGIONCODE}")
+    @Value("${AWSREGIONCODE}")
     String awsRegionCode;
     @Bean
     public SqsClient getSqsClient() {
