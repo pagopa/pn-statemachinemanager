@@ -3,51 +3,38 @@ package it.pagopa.pn.statemachinemanager.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 
 import java.net.URI;
 
 @Configuration
 public class AwsConfiguration {
 
-    /**
-     * Set in SQSLocalStackTestConfig
-     */
-    @Value("${aws.sqs.test.endpoint:#{null}}")
-    String sqsLocalStackEndpoint;
+
 
     /**
-     * Set in DynamoDbLocalStackTestConfig
+     * Set in LocalStackTestConfig
      */
-    @Value("${aws.dynamodb.test.endpoint:#{null}}")
+    @Value("${AWS_REGIONCODE}")
+    String awsRegion;
+
+    /**
+     * Set in LocalStackTestConfig
+     */
+    @Value("${test.aws.dynamodb.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
 
-    @Bean
-    public SqsClient getSqsClient() {
-        SqsClientBuilder sqsClientBuilder = SqsClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider.create());
+    private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER = DefaultCredentialsProvider.create();
 
-        if (sqsLocalStackEndpoint != null) {
-            sqsClientBuilder.endpointOverride(URI.create(sqsLocalStackEndpoint));
-        }
-
-        return sqsClientBuilder.build();
-    }
 
     @Bean
-    public DynamoDbClient getDynamoDbClient() {
-        DynamoDbClientBuilder dynamoDbClientBuilder = DynamoDbClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider.create());
-
+    public DynamoDbClient dynamoDbClient() {
+        DynamoDbClientBuilder dynamoDbClientBuilder = DynamoDbClient.builder().region(Region.of(awsRegion)).credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER);
         if (dynamoDbLocalStackEndpoint != null) {
             dynamoDbClientBuilder.endpointOverride(URI.create(dynamoDbLocalStackEndpoint));
         }
@@ -64,4 +51,6 @@ public class AwsConfiguration {
     public DynamoDbWaiter getDynamoDbWaiter(DynamoDbClient dynamoDbClient) {
         return DynamoDbWaiter.builder().client(dynamoDbClient).build();
     }
+
+
 }
