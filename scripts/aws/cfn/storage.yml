@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Some storage with input and output
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Nome dell'ambiente destinazione
+
+  # Unused but required by CD pipeline
+  MicroserviceNumber:
+    Type: Number
+    Description: An unique number that identify the microservice inside the ECS cluster.
+
+  # Unused but required by CD pipeline
+  TemplateBucketBaseUrl:
+    Type: String
+    Description: URL da cui caricare i frammenti di template di infrastruttura
+  
+  Version:
+    Type: String
+    Description: 'keep track of used projects commitIds'
+  
+  # CdcKinesisSourceStreamArn:
+  #   Type: String
+  #   Description: 'Where to send CDC'
+
+
+Resources:
+
+  PnSmmTableClientStates:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "processClientId"
+          AttributeType: "S"
+        - AttributeName: "currStatus"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "processClientId"
+          KeyType: "HASH"
+        - AttributeName: "currStatus"
+          KeyType: "RANGE"
+      #KinesisStreamSpecification:
+      #  StreamArn: "String"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: "KMS"
+      TableClass: "STANDARD"
+    DeletionPolicy: Retain
+
+Outputs:
+
+  PnSmmTableNameClientStates:
+    Description: 'Nome della Tabella DynamoDB relativa alla Macchina a Stati'
+    Value: !Ref PnSmmTableClientStates
+
+  PnSmmTableArnClientStates:
+    Description: 'ARN della Tabella DynamoDB relativa alla Macchina a Stati'
+    Value: !GetAtt PnSmmTableClientStates.Arn
+
