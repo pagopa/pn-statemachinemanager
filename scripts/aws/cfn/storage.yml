@@ -27,7 +27,7 @@ Parameters:
 
 Resources:
 
-  PnSmmTableClientStates:
+  PnSmTableClientStates:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
@@ -53,11 +53,11 @@ Resources:
 
 Outputs:
 
-  PnSmmTableNameClientStates:
+  PnSmTableNameClientStates:
     Description: 'Nome della Tabella DynamoDB relativa alla Macchina a Stati'
-    Value: !Ref PnSmmTableClientStates
+    Value: !Ref PnSmTableClientStates
 
-  PnSmmTableArnClientStates:
+  PnSmTableArnClientStates:
     Description: 'ARN della Tabella DynamoDB relativa alla Macchina a Stati'
-    Value: !GetAtt PnSmmTableClientStates.Arn
+    Value: !GetAtt PnSmTableClientStates.Arn
 
