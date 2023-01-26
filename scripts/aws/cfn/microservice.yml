@@ -11,13 +11,13 @@ Parameters:
     Type: String
     Description: ARN of alarm topic
 
-  WebApiDnsName:
-    Type: String
-    Description: 'The DNS name used for WEB rest API.'
+  # WebApiDnsName:
+  #   Type: String
+  #   Description: 'The DNS name used for WEB rest API.'
   
-  CorsAllowedDomains:
-    Type: String
-    Description: 'Comma separated list of domains allowed to make cross origin request'
+  # CorsAllowedDomains:
+  #   Type: String
+  #   Description: 'Comma separated list of domains allowed to make cross origin request'
 
   ContainerImageUri:
     Type: String
@@ -59,25 +59,26 @@ Parameters:
     Type: String
     Description: 'network load balancer link for API-GW'
   
-  LogsKinesisSourceStreamArn:
-    Type: String
-    Description: 'Kinesis stream that receive logs'
+  # LogsKinesisSourceStreamArn:
+  #   Type: String
+  #   Description: 'Kinesis stream that receive logs'
   
   Version:
     Type: String
     Description: 'keep track of used projects commitIds'
 
-  PnSmmTableNameClientStates:
+  PnSmTableNameClientStates:
     Type: String
     Description: 'Nome della Tabella DynamoDB relativa alla Macchina a Stati'
   
-  PnSmmTableArnClientStates:
+  PnSmTableArnClientStates:
     Type: String
     Description: 'ARN della Tabella DynamoDB relativa alla Macchina a Stati'
   
-  PnSsmManagedPolicyName:
+  PnSmManagedPolicyName:
     Type: String
     Description: 'Nome della managed policy associata alla state machine'
+    Default: 'PnSm'
   
 
 Resources:
@@ -94,7 +95,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        ContainerEnvEntry2: !Sub 'PnSmmTableClientStates=${PnSmmTableNameClientStates}'
+        ContainerEnvEntry2: !Sub 'PnSmmTableClientStates=${PnSmTableNameClientStates}'
         MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -103,14 +104,14 @@ Resources:
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
-        TaskRoleManagedPolicyArn: !Ref PnSsmManagedPolicy
+        TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
 
   
-  PnSsmManagedPolicy:
+  PnSmManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: "String"
-      ManagedPolicyName: !Ref PnSsmManagedPolicyName
+      ManagedPolicyName: !Ref PnSmManagedPolicyName
       PolicyDocument: 
         Version: 2012-10-17
         Statement:
@@ -122,7 +123,7 @@ Resources:
               - 'dynamodb:Scan'
               - 'dynamodb:List*'
             Resource:
-              - !Sub "${PnSmmTableArnClientStates}"
+              - !Sub "${PnSmTableArnClientStates}"
 
 
         
