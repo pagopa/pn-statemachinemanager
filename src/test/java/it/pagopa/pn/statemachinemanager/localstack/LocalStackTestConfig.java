@@ -31,8 +31,8 @@ public class LocalStackTestConfig {
     private DynamoDbWaiter dynamoDbWaiter;
 
     static DockerImageName dockerImageName = DockerImageName.parse("localstack/localstack:1.0.4");
-    static LocalStackContainer localStackContainer = new LocalStackContainer(dockerImageName).withServices(DYNAMODB)
-            .withClasspathResourceMapping("testcontainers/innit.sh" , "/docker-entrypoint-initaws" + ".d/make-storages.sh", BindMode.READ_ONLY);
+    static LocalStackContainer localStackContainer = new LocalStackContainer(dockerImageName).withServices(DYNAMODB);
+
 
     static {
         localStackContainer.start();
