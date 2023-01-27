@@ -46,7 +46,15 @@ public class StateMachineService {
 
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
+            while (!results.hasNext()) {
 
+                    processClientId.setProcessClientId(partition_id);
+                    queryConditional = QueryConditional
+                            .keyEqualTo(Key.builder()
+                                    .partitionValue(processClientId.getProcessClientId()).sortValue(sort_id)
+                                    .build());
+                    results = transactionTable.query(queryConditional).items().iterator();
+            }
 
             List<Transaction> result = new ArrayList<>();
             while (results.hasNext()) {
