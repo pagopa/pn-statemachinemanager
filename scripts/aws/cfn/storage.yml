@@ -51,6 +51,35 @@ Resources:
       TableClass: "STANDARD"
     DeletionPolicy: Retain
 
+  PnSmUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: 'Private'
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+
+  PnSmUploadBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PnSmUploadBucket
+      PolicyDocument: 
+        Statement: 
+            - Action: 
+                - "s3:*"
+              Effect: "Allow"
+              Resource: !Sub ${PnSmUploadBucket}
+              Principal:  
+                AWS: 
+                  - !Join [ '', [ !Sub 'arn:aws:iam::${AWS::AccountId}:user/' , 'mario.ottone@dgsspa.com']]
+
+
 Outputs:
 
   PnSmTableNameClientStates:
