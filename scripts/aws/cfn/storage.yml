@@ -31,30 +31,30 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: "processClientId"
-          AttributeType: "S"
-        - AttributeName: "currStatus"
-          AttributeType: "S"
+        - AttributeName: 'processClientId'
+          AttributeType: 'S'
+        - AttributeName: 'currStatus'
+          AttributeType: 'S'
       KeySchema: 
-        - AttributeName: "processClientId"
-          KeyType: "HASH"
-        - AttributeName: "currStatus"
-          KeyType: "RANGE"
+        - AttributeName: 'processClientId'
+          KeyType: 'HASH'
+        - AttributeName: 'currStatus'
+          KeyType: 'RANGE'
       #KinesisStreamSpecification:
-      #  StreamArn: "String"
+      #  StreamArn: 'String'
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
       SSESpecification:
         SSEEnabled: true
-        SSEType: "KMS"
-      TableClass: "STANDARD"
+        SSEType: 'KMS'
+      TableClass: 'STANDARD'
     DeletionPolicy: Retain
 
   PnSmUploadBucket:
-    Type: AWS::S3::Bucket
+    Type: 'AWS::S3::Bucket'
     Properties:
-      AccessControl: 'Private'
+      AccessControl: Private
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerEnforced
@@ -63,21 +63,26 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      
 
   PnSmUploadBucketPolicy:
-    Type: AWS::S3::BucketPolicy
+    Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket: !Ref PnSmUploadBucket
-      PolicyDocument: 
-        Statement: 
-            - Action: 
-                - "s3:*"
-              Effect: "Allow"
-              Resource: !Sub ${PnSmUploadBucket}
-              Principal:  
-                AWS: 
-                  - !Join [ '', [ !Sub 'arn:aws:iam::${AWS::AccountId}:user/' , 'mario.ottone@dgsspa.com']]
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:*'
+            Effect: Allow
+            Resource:
+              - !GetAtt PnSmUploadBucket.Arn
+              - !Join 
+                - ''
+                - - !GetAtt PnSmUploadBucket.Arn
+                  - '/*'
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:user/mario.ottone@dgsspa.com'
 
 
 Outputs:
