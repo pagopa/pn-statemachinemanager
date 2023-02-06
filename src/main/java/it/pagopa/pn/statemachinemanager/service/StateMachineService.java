@@ -1,7 +1,7 @@
 package it.pagopa.pn.statemachinemanager.service;
 
-import it.pagopa.pn.statemachinemanager.model.Response;
-import it.pagopa.pn.statemachinemanager.model.Transaction;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -20,7 +20,7 @@ public class StateMachineService {
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    @Value("${PnSmmTableClientStates}")
+    @Value("${PnSmTableClientStates}")
     String pnSmmTableClientStates;
 
 
@@ -32,26 +32,31 @@ public class StateMachineService {
     public static final String SEPARATORE = "#";
 
 
-    public Response queryTable(String partition_id, String sort_id ,String clientId,String nextStatus) {
+    public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus) {
         Response resp = new Response();
         Transaction processClientId =  new Transaction();
-        processClientId.setProcessClientId(partition_id + SEPARATORE +clientId);
+        if (!clientId.isEmpty() && clientId != null){
+            processClientId.setProcessClientId(processId + SEPARATORE +clientId);
+        }else {
+            processClientId.setProcessClientId(processId);
+        }
+
         try {
 
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
-                            .partitionValue(processClientId.getProcessClientId()).sortValue(sort_id)
+                            .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
                             .build());
 
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
             while (!results.hasNext()) {
 
-                    processClientId.setProcessClientId(partition_id);
+                    processClientId.setProcessClientId(processId);
                     queryConditional = QueryConditional
                             .keyEqualTo(Key.builder()
-                                    .partitionValue(processClientId.getProcessClientId()).sortValue(sort_id)
+                                    .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
                                     .build());
                     results = transactionTable.query(queryConditional).items().iterator();
             }
@@ -66,9 +71,8 @@ public class StateMachineService {
 
             }
 
-            if(result.get(0).getTargetStatus().contains(nextStatus)){
+            if(!result.isEmpty() ){
                 resp.setAllowed(true);
-//                result.get(0).setAllowed(resp.isAllowed());
             }
 
             return resp;

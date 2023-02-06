@@ -1,4 +1,4 @@
-package it.pagopa.pn.statemachinemanager.model;
+package it.pagopa.pn.statemachinemanager.repositorymanager.constant.model;
 
 public class Response {
     boolean Allowed =false;
