@@ -94,7 +94,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        ContainerEnvEntry2: !Sub 'PnSmmTableClientStates=${PnSmTableNameClientStates}'
+        ContainerEnvEntry2: !Sub 'PnSmTableClientStates=${PnSmTableNameClientStates}'
         MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -104,6 +104,7 @@ Resources:
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         # CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
+        # HealthCheckPath: 
 
   
   PnSmManagedPolicy:
