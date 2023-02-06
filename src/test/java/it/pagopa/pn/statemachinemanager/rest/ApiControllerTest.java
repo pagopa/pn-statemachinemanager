@@ -1,8 +1,8 @@
 package it.pagopa.pn.statemachinemanager.rest;
 
 import it.pagopa.pn.statemachinemanager.annotation.SpringBootTestWebEnv;
-import it.pagopa.pn.statemachinemanager.model.Response;
-import it.pagopa.pn.statemachinemanager.model.Transaction;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
