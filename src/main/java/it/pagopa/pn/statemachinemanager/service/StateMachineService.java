@@ -1,5 +1,6 @@
 package it.pagopa.pn.statemachinemanager.service;
 
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception.StateManagerException;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ public class StateMachineService {
     public static final String SEPARATORE = "#";
 
 
-    public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus) {
+    public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus)  {
         Response resp = new Response();
         Transaction processClientId =  new Transaction();
         if (!clientId.isEmpty() && clientId != null){
@@ -51,7 +52,8 @@ public class StateMachineService {
 
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
-            while (!results.hasNext()) {
+
+                if (!results.hasNext()) {
 
                     processClientId.setProcessClientId(processId);
                     queryConditional = QueryConditional
@@ -59,9 +61,11 @@ public class StateMachineService {
                                     .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
                                     .build());
                     results = transactionTable.query(queryConditional).items().iterator();
-            }
+                }
+
 
             List<Transaction> result = new ArrayList<>();
+
             while (results.hasNext()) {
                 Transaction rec = results.next();
                 result.add(rec);
@@ -73,6 +77,8 @@ public class StateMachineService {
 
             if(!result.isEmpty() ){
                 resp.setAllowed(true);
+            }else {
+                throw new StateManagerException.ErrorRequestValidate( clientId);
             }
 
             return resp;
