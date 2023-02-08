@@ -36,7 +36,7 @@ public class StateMachineService {
 
 
     public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus)  {
-        validaRequest(processId,currStatus,clientId,nextStatus);
+        validaRequest(processId,currStatus,nextStatus);
         Response resp = new Response();
         Transaction processClientId =  new Transaction();
         if (!clientId.isEmpty() && clientId != null){
@@ -101,16 +101,14 @@ public class StateMachineService {
         }
     }
 
-    private void validaRequest(String processId, String currStatus, String clientId, String nextStatus) {
+    private void validaRequest(String processId, String currStatus,  String nextStatus) {
         if (processId == null || processId.isEmpty() || processId.isBlank() ){
             log.info("Errore validazione dati proccessId : " + processId);
             throw new StateManagerException.ErrorRequestValidateProccesId( processId);
         }else if (currStatus == null  || currStatus.isEmpty() || currStatus.isBlank()){
             log.info("Errore validazione dati currStatus : " + currStatus);
             throw new StateManagerException.ErrorRequestValidateCurrentStatus( currStatus);
-        }else if (clientId == null  || clientId.isEmpty() || clientId.isBlank()){
-            log.info("Errore validazione dati clientId : " + clientId);
-            throw new StateManagerException.ErrorRequestValidateNotFoundClientId( clientId);
+
         }else if (nextStatus == null  || nextStatus.isEmpty() || nextStatus.isBlank()){
             log.info("Errore validazione dati nextStatus : " + nextStatus);
             throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus( nextStatus);
