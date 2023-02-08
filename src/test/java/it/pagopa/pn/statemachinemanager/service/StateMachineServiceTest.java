@@ -1,6 +1,7 @@
 package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.statemachinemanager.annotation.SpringBootTestWebEnv;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception.StateManagerException;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import org.junit.jupiter.api.*;
@@ -83,8 +84,56 @@ class StateMachineServiceTest {
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(Response.class);
+                .isOk();
+    }
+
+    @Test
+    @Order(3)
+    void getStatusTestKOClientId() {
+        String process = "INVIO_PEC";
+        String currStato = "BOOKED";
+        String clientId = "C05";
+        String nextStatus = "COMPOSED";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(StateManagerException.ErrorRequestValidateNotFoundClientId.class);
+    }
+
+
+    @Test
+    @Order(4)
+    void getStatusTestKOCurrenStatus() {
+        String process = "PEC";
+        String currStato = null;
+        String clientId = "C05";
+        String nextStatus = "COMPOSED";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(StateManagerException.ErrorRequestValidateNotFoundCurrentStatus.class);
+    }
+
+    @Test
+    @Order(5)
+    void getStatusTestKONextStatus() {
+        String process = "PEC";
+        String currStato = "BOOKED";
+        String clientId = "C05";
+        String nextStatus = null;
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(StateManagerException.ErrorRequestValidateNotFoundNextStatus.class);
     }
 
 }

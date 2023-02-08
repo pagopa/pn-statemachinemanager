@@ -3,6 +3,7 @@ package it.pagopa.pn.statemachinemanager.service;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception.StateManagerException;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -17,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Service
+@Slf4j
 public class StateMachineService {
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
@@ -34,6 +36,7 @@ public class StateMachineService {
 
 
     public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus)  {
+        validaRequest(processId,currStatus,clientId,nextStatus);
         Response resp = new Response();
         Transaction processClientId =  new Transaction();
         if (!clientId.isEmpty() && clientId != null){
@@ -41,8 +44,9 @@ public class StateMachineService {
         }else {
             processClientId.setProcessClientId(processId);
         }
-
         try {
+            boolean notFound= true;
+
 
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
@@ -67,18 +71,25 @@ public class StateMachineService {
             List<Transaction> result = new ArrayList<>();
 
             while (results.hasNext()) {
+                notFound = false;
                 Transaction rec = results.next();
-                result.add(rec);
+                if (rec.getTargetStatus().contains(nextStatus)){
+                    result.add(rec);
+                }
                 System.out.println("The process of the movie is "+rec.getProcessClientId());
                 System.out.println("The reqeust status to validate  is "+nextStatus);
                 System.out.println("The target status information  is "+rec.getTargetStatus());
 
             }
 
+            if (notFound){
+                throw new StateManagerException.ErrorRequestValidateNotFoundCurrentStatus(currStatus);
+            }
             if(!result.isEmpty() ){
                 resp.setAllowed(true);
-            }else {
-                throw new StateManagerException.ErrorRequestValidate( clientId);
+            }
+            else {
+                resp.setAllowed(false);
             }
 
             return resp;
@@ -87,6 +98,22 @@ public class StateMachineService {
             System.err.println(e.getMessage());
             System.exit(1);
             return resp;
+        }
+    }
+
+    private void validaRequest(String processId, String currStatus, String clientId, String nextStatus) {
+        if (processId == null || processId.isEmpty() || processId.isBlank() ){
+            log.info("Errore validazione dati proccessId : " + processId);
+            throw new StateManagerException.ErrorRequestValidateProccesId( processId);
+        }else if (currStatus == null  || currStatus.isEmpty() || currStatus.isBlank()){
+            log.info("Errore validazione dati currStatus : " + currStatus);
+            throw new StateManagerException.ErrorRequestValidateCurrentStatus( currStatus);
+        }else if (clientId == null  || clientId.isEmpty() || clientId.isBlank()){
+            log.info("Errore validazione dati clientId : " + clientId);
+            throw new StateManagerException.ErrorRequestValidateNotFoundClientId( clientId);
+        }else if (nextStatus == null  || nextStatus.isEmpty() || nextStatus.isBlank()){
+            log.info("Errore validazione dati nextStatus : " + nextStatus);
+            throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus( nextStatus);
         }
     }
 

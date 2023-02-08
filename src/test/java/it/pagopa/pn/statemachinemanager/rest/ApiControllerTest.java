@@ -84,8 +84,66 @@ class ApiControllerTest {
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(Response.class);
+                .isOk();
+    }
+
+    @Test
+    @Order(3)
+    void getStatusTestKOClientId() {
+        String process = "INVIO_PEC";
+        String currStato = "BOOKD";
+        String clientId = "null";
+        String nextStatus = "COMPOSED";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    @Order(4)
+    void getStatusTestKOProccessId() {
+        String process = null;
+        String currStato = "BOOKED";
+        String clientId = "C05";
+        String nextStatus = "COMPOSED";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+    @Test
+    @Order(4)
+    void getStatusTestKOCurrenStatus() {
+        String process = "PEC";
+        String currStato = null;
+        String clientId = "C05";
+        String nextStatus = "COMPOSED";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    @Order(5)
+    void getStatusTestKONextStatus() {
+        String process = "PEC";
+        String currStato = "BOOKE";
+        String clientId = "C05";
+        String nextStatus = null;
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
 
