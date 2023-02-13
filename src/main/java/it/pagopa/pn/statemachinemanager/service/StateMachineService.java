@@ -37,7 +37,7 @@ public class StateMachineService {
 
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
-        String anyStatus = "_ANY_";
+        String anyStatus = "_any_";
         validaRequest(processId, currStatus, nextStatus);
         Response resp = new Response();
         Transaction processClientId = new Transaction();

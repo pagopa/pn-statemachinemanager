@@ -55,7 +55,7 @@ class ApiControllerTest {
 
             transaction  = new Transaction();
             transaction.setProcessClientId("INVIO_PEC#C050");
-            transaction.setCurrStatus("_ANY_");
+            transaction.setCurrStatus("_any_");
             transaction.setTargetStatus(list2);
 
             custTable.putItem(transaction);
