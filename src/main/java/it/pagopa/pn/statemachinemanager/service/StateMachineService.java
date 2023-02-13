@@ -32,23 +32,23 @@ public class StateMachineService {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
         this.pnSmmTableClientStates = pnSmmTableClientStates;
     }
+
     public static final String SEPARATORE = "#";
 
 
-    public Response queryTable(String processId, String currStatus ,String clientId,String nextStatus)  {
-        validaRequest(processId,currStatus,nextStatus);
+    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
+        validaRequest(processId, currStatus, nextStatus);
         Response resp = new Response();
-        Transaction processClientId =  new Transaction();
-        if (!clientId.isEmpty() && clientId != null){
-            processClientId.setProcessClientId(processId + SEPARATORE +clientId);
-        }else {
+        Transaction processClientId = new Transaction();
+        if (!clientId.isEmpty() && clientId != null) {
+            processClientId.setProcessClientId(processId + SEPARATORE + clientId);
+        } else {
             processClientId.setProcessClientId(processId);
         }
+        DynamoDbTable<Transaction> transactionTable;
         try {
-            boolean notFound= true;
-
-
-            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
+            boolean notFound = true;
+            transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
                             .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
@@ -57,15 +57,15 @@ public class StateMachineService {
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
 
-                if (!results.hasNext()) {
+            if (!results.hasNext()) {
 
-                    processClientId.setProcessClientId(processId);
-                    queryConditional = QueryConditional
-                            .keyEqualTo(Key.builder()
-                                    .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
-                                    .build());
-                    results = transactionTable.query(queryConditional).items().iterator();
-                }
+                processClientId.setProcessClientId(processId);
+                queryConditional = QueryConditional
+                        .keyEqualTo(Key.builder()
+                                .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
+                                .build());
+                results = transactionTable.query(queryConditional).items().iterator();
+            }
 
 
             List<Transaction> result = new ArrayList<>();
@@ -73,45 +73,64 @@ public class StateMachineService {
             while (results.hasNext()) {
                 notFound = false;
                 Transaction rec = results.next();
-                if (rec.getTargetStatus().contains(nextStatus)){
+                if (rec.getTargetStatus().contains(nextStatus)) {
                     result.add(rec);
                 }
-                System.out.println("The process of the movie is "+rec.getProcessClientId());
-                System.out.println("The reqeust status to validate  is "+nextStatus);
-                System.out.println("The target status information  is "+rec.getTargetStatus());
+                System.out.println("The process of the movie is " + rec.getProcessClientId());
+                System.out.println("The reqeust status to validate  is " + nextStatus);
+                System.out.println("The target status information  is " + rec.getTargetStatus());
+
+            }
+            //Check if target Status is related to _ANY_ status
+            if (notFound) {
+                QueryConditional queryConditionalAny = QueryConditional
+                        .keyEqualTo(Key.builder()
+                                .partitionValue(processClientId.getProcessClientId()).sortValue("_ANY_")
+                                .build());
+                results = transactionTable.query(queryConditional).items().iterator();
+                while (results.hasNext()) {
+                    notFound = false;
+                    Transaction rec = results.next();
+                    if (rec.getTargetStatus().contains(nextStatus)) {
+                        result.add(rec);
+                    }
+                    log.debug("The process of the transaction is " + rec.getProcessClientId());
+                    log.debug("The reqeust status to validate  is " + nextStatus);
+                    log.debug("The target status information  is " + rec.getTargetStatus());
+
+                }
 
             }
 
-            if (notFound){
+            if (notFound) {
                 throw new StateManagerException.ErrorRequestValidateNotFoundCurrentStatus(currStatus);
             }
-            if(!result.isEmpty() ){
+            if (!result.isEmpty()) {
                 resp.setAllowed(true);
-            }
-            else {
+            } else {
                 resp.setAllowed(false);
             }
 
             return resp;
 
-        } catch (DynamoDbException e) {
+        } catch(DynamoDbException e){
             System.err.println(e.getMessage());
             System.exit(1);
             return resp;
         }
     }
 
-    private void validaRequest(String processId, String currStatus,  String nextStatus) {
-        if (processId == null || processId.isEmpty() || processId.isBlank() ){
+    private void validaRequest(String processId, String currStatus, String nextStatus) {
+        if (processId == null || processId.isEmpty() || processId.isBlank()) {
             log.info("Errore validazione dati proccessId : " + processId);
-            throw new StateManagerException.ErrorRequestValidateProccesId( processId);
-        }else if (currStatus == null  || currStatus.isEmpty() || currStatus.isBlank()){
+            throw new StateManagerException.ErrorRequestValidateProccesId(processId);
+        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
             log.info("Errore validazione dati currStatus : " + currStatus);
-            throw new StateManagerException.ErrorRequestValidateCurrentStatus( currStatus);
+            throw new StateManagerException.ErrorRequestValidateCurrentStatus(currStatus);
 
-        }else if (nextStatus == null  || nextStatus.isEmpty() || nextStatus.isBlank()){
+        } else if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
             log.info("Errore validazione dati nextStatus : " + nextStatus);
-            throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus( nextStatus);
+            throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
         }
     }
 
