@@ -50,6 +50,16 @@ class ApiControllerTest {
             // Put the customer data into an Amazon DynamoDB table.
             custTable.putItem(transaction);
 
+            List<String> list2 = new ArrayList<>();
+            list2.add("INTERNAL_ERROR");
+
+            transaction  = new Transaction();
+            transaction.setProcessClientId("INVIO_PEC#C050");
+            transaction.setCurrStatus("_ANY_");
+            transaction.setTargetStatus(list2);
+
+            custTable.putItem(transaction);
+
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -117,7 +127,7 @@ class ApiControllerTest {
                 .isNotFound();
     }
     @Test
-    @Order(4)
+    @Order(5)
     void getStatusTestKOCurrenStatus() {
         String process = "PEC";
         String currStato = null;
@@ -132,7 +142,7 @@ class ApiControllerTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void getStatusTestKONextStatus() {
         String process = "PEC";
         String currStato = "BOOKE";
@@ -145,7 +155,20 @@ class ApiControllerTest {
                 .expectStatus()
                 .isNotFound();
     }
-
+    @Test
+    @Order(7)
+    void getStatusTestANYCurrStatus() {
+        String process = "INVIO_PEC";
+        String currStato = "BOOKED";
+        String clientId = "C050";
+        String nextStatus = "INTERNAL_ERROR";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
 
 }
 

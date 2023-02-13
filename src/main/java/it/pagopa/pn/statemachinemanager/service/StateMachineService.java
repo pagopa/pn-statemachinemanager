@@ -37,6 +37,7 @@ public class StateMachineService {
 
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
+        String anyStatus = "_ANY_";
         validaRequest(processId, currStatus, nextStatus);
         Response resp = new Response();
         Transaction processClientId = new Transaction();
@@ -45,10 +46,10 @@ public class StateMachineService {
         } else {
             processClientId.setProcessClientId(processId);
         }
-        DynamoDbTable<Transaction> transactionTable;
+
         try {
             boolean notFound = true;
-            transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
+            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
                             .partitionValue(processClientId.getProcessClientId()).sortValue(currStatus)
@@ -82,10 +83,10 @@ public class StateMachineService {
 
             }
             //Check if target Status is related to _ANY_ status
-            if (notFound) {
-                QueryConditional queryConditionalAny = QueryConditional
+            if (notFound || result.size()<1) {
+                queryConditional = QueryConditional
                         .keyEqualTo(Key.builder()
-                                .partitionValue(processClientId.getProcessClientId()).sortValue("_ANY_")
+                                .partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus)
                                 .build());
                 results = transactionTable.query(queryConditional).items().iterator();
                 while (results.hasNext()) {
@@ -94,9 +95,9 @@ public class StateMachineService {
                     if (rec.getTargetStatus().contains(nextStatus)) {
                         result.add(rec);
                     }
-                    log.debug("The process of the transaction is " + rec.getProcessClientId());
-                    log.debug("The reqeust status to validate  is " + nextStatus);
-                    log.debug("The target status information  is " + rec.getTargetStatus());
+                    System.out.println("The process of the transaction is " + rec.getProcessClientId());
+                    System.out.println("The reqeust status to validate  is " + nextStatus);
+                    System.out.println("The target status is " + rec.getTargetStatus());
 
                 }
 
