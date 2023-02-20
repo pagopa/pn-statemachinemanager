@@ -18,9 +18,7 @@ public class ApiController  {
 
     @GetMapping(path="/validate/{process}/{status}")
     public Response validateStatus(@PathVariable("process") String process, @PathVariable("status") String status, @RequestParam(value = "clientId") String clientId,@RequestParam(value = "nextStatus") String nextStatus) {
-        Response result = service.queryTable(process, status,clientId,nextStatus);
-        System.out.println("RESULT=" + result.isAllowed());
-        return result;
+        return service.queryTable(process, status,clientId,nextStatus);
     }
 
 

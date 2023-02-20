@@ -108,11 +108,11 @@ class StateMachineServiceTest {
     @Order(4)
     void getStatusTestKOCurrenStatus() {
         String process = "PEC";
-        String currStato = null;
+        //String currStato = null;
         String clientId = "C05";
         String nextStatus = "COMPOSED";
         webClient.get()
-                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/?clientId="+clientId + "&nextStatus="+ nextStatus)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
