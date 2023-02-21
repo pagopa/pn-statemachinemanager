@@ -13,7 +13,8 @@ public class Transaction {
     private String currStatus;
     private List<String> targetStatus;
 
-
+    private String externalStatus;
+    private String logicStatus;
 
 
     @DynamoDbPartitionKey
@@ -40,6 +41,22 @@ public class Transaction {
 
     public void setTargetStatus(List<String> targetStatus) {
         this.targetStatus = targetStatus;
+    }
+
+    public String getExternalStatus() {
+        return externalStatus;
+    }
+
+    public void setExternalStatus(String externalStatus) {
+        this.externalStatus = externalStatus;
+    }
+
+    public String getLogicStatus() {
+        return logicStatus;
+    }
+
+    public void setLogicStatus(String logicStatus) {
+        this.logicStatus = logicStatus;
     }
 
 

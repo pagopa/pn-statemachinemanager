@@ -1,6 +1,7 @@
 package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception.StateManagerException;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import lombok.extern.slf4j.Slf4j;
@@ -99,6 +100,41 @@ public class StateMachineService {
         }
     }
 
+    public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId){
+
+        this.validateRequest(processId, currStatus);
+        Transaction processClientId = new Transaction();
+        ExternalStatusResponse resp = new ExternalStatusResponse();
+
+
+        if (!clientId.isEmpty()) {
+            processClientId.setProcessClientId(processId + SEPARATORE + clientId);
+        } else {
+            processClientId.setProcessClientId(processId);
+        }
+
+        try {
+
+            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
+
+            Transaction element = transactionTable.getItem(Key.builder().partitionValue(processClientId.getProcessClientId()).build());
+
+            if(element == null){
+                throw new StateManagerException.ErrorRequestValidateNotFoundProcessClientId(processClientId.getProcessClientId());
+            }
+
+            resp.setExternalStatus(element.getExternalStatus());
+            resp.setLogicStatus(element.getLogicStatus());
+
+            return resp;
+
+        } catch(DynamoDbException e){
+            log.error(e.getMessage());
+            System.exit(1);
+            return resp;
+        }
+    }
+
     private void validaRequest(String processId, String currStatus, String nextStatus){
         if (processId == null || processId.isEmpty() || processId.isBlank()) {
             log.info("Errore validazione dati proccessId : " + processId);
@@ -112,5 +148,17 @@ public class StateMachineService {
             throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
         }
     }
+
+    private void validateRequest(String processId, String currStatus){
+        if (processId == null || processId.isEmpty() || processId.isBlank()) {
+            log.info("Errore validazione dati proccessId : " + processId);
+            throw new StateManagerException.ErrorRequestValidateProccesId(processId);
+        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
+            log.info("Errore validazione dati currStatus : " + currStatus);
+            throw new StateManagerException.ErrorRequestValidateCurrentStatus(currStatus);
+        }
+    }
+
+
 
 }
