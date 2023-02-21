@@ -29,6 +29,13 @@ public class StateManagerException extends RuntimeException{
         }
     }
 
+    public static class ErrorRequestValidateNotFoundProcessClientId extends RuntimeException {
+
+        public ErrorRequestValidateNotFoundProcessClientId(String message) {
+            super(String.format("Errore validazione dati proccessId : '%s'", message));
+        }
+    }
+
     public static class ErrorRequestValidateCurrentStatus extends RuntimeException {
 
         public ErrorRequestValidateCurrentStatus(String message) {

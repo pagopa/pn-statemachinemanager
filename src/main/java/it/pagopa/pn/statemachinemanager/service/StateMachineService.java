@@ -1,6 +1,7 @@
 package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception.StateManagerException;
+import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Response;
 import it.pagopa.pn.statemachinemanager.repositorymanager.constant.model.Transaction;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -79,9 +79,9 @@ public class StateMachineService {
                 if (rec.getTargetStatus().contains(nextStatus)) {
                     result.add(rec);
                 }
-                System.out.println("The process of the movie is " + rec.getProcessClientId());
-                System.out.println("The reqeust status to validate  is " + nextStatus);
-                System.out.println("The target status information  is " + rec.getTargetStatus());
+                log.info("The process of the movie is " + rec.getProcessClientId());
+                log.info("The reqeust status to validate  is " + nextStatus);
+                log.info("The target status information  is " + rec.getTargetStatus());
 
             }
 
@@ -94,6 +94,48 @@ public class StateMachineService {
 
         } catch(DynamoDbException e){
             log.error(e.getMessage());
+            System.exit(1);
+            return resp;
+        }
+    }
+
+    public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId){
+
+        this.validateRequest(processId, currStatus);
+        Transaction processClientId = new Transaction();
+        ExternalStatusResponse resp = new ExternalStatusResponse();
+
+        if (!clientId.isEmpty()) {
+            processClientId.setProcessClientId(processId + SEPARATORE + clientId);
+        } else {
+            processClientId.setProcessClientId(processId);
+        }
+
+        try {
+
+            DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
+
+            Key key = Key.builder().partitionValue(processClientId.getProcessClientId()).build();
+
+            QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
+
+            Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
+
+            if(results.hasNext()){
+                Transaction element = results.next();
+                resp.setExternalStatus(element.getExternalStatus());
+                resp.setLogicStatus(element.getLogicStatus());
+
+            } else {
+                log.info("element not found ");
+                throw new StateManagerException.ErrorRequestValidateNotFoundCurrentStatus(processClientId.getProcessClientId());
+            }
+
+            return resp;
+
+        } catch(DynamoDbException e){
+            log.error(e.getMessage());
+            log.info("try catch error ");
             System.exit(1);
             return resp;
         }
@@ -112,5 +154,17 @@ public class StateMachineService {
             throw new StateManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
         }
     }
+
+    private void validateRequest(String processId, String currStatus){
+        if (processId == null || processId.isEmpty() || processId.isBlank()) {
+            log.info("Errore validazione dati proccessId : " + processId);
+            throw new StateManagerException.ErrorRequestValidateProccesId(processId);
+        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
+            log.info("Errore validazione dati currStatus : " + currStatus);
+            throw new StateManagerException.ErrorRequestValidateCurrentStatus(currStatus);
+        }
+    }
+
+
 
 }
