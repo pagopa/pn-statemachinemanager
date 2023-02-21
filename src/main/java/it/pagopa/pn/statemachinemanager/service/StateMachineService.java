@@ -13,7 +13,6 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -80,9 +79,9 @@ public class StateMachineService {
                 if (rec.getTargetStatus().contains(nextStatus)) {
                     result.add(rec);
                 }
-                System.out.println("The process of the movie is " + rec.getProcessClientId());
-                System.out.println("The reqeust status to validate  is " + nextStatus);
-                System.out.println("The target status information  is " + rec.getTargetStatus());
+                log.info("The process of the movie is " + rec.getProcessClientId());
+                log.info("The reqeust status to validate  is " + nextStatus);
+                log.info("The target status information  is " + rec.getTargetStatus());
 
             }
 
@@ -106,7 +105,6 @@ public class StateMachineService {
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();
 
-
         if (!clientId.isEmpty()) {
             processClientId.setProcessClientId(processId + SEPARATORE + clientId);
         } else {
@@ -117,19 +115,27 @@ public class StateMachineService {
 
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
 
-            Transaction element = transactionTable.getItem(Key.builder().partitionValue(processClientId.getProcessClientId()).build());
+            Key key = Key.builder().partitionValue(processClientId.getProcessClientId()).build();
 
-            if(element == null){
-                throw new StateManagerException.ErrorRequestValidateNotFoundProcessClientId(processClientId.getProcessClientId());
+            QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
+
+            Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
+
+            if(results.hasNext()){
+                Transaction element = results.next();
+                resp.setExternalStatus(element.getExternalStatus());
+                resp.setLogicStatus(element.getLogicStatus());
+
+            } else {
+                log.info("element not found ");
+                throw new StateManagerException.ErrorRequestValidateNotFoundCurrentStatus(processClientId.getProcessClientId());
             }
-
-            resp.setExternalStatus(element.getExternalStatus());
-            resp.setLogicStatus(element.getLogicStatus());
 
             return resp;
 
         } catch(DynamoDbException e){
             log.error(e.getMessage());
+            log.info("try catch error ");
             System.exit(1);
             return resp;
         }

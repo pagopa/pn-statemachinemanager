@@ -26,8 +26,6 @@ class ApiControllerTest {
 
     @Autowired
     private WebTestClient webClient;
-
-
     @Autowired
     DynamoDbEnhancedClient enhancedClient;
 
@@ -46,6 +44,8 @@ class ApiControllerTest {
             transaction.setProcessClientId("INVIO_PEC#C050");
             transaction.setCurrStatus("BOOKED");
             transaction.setTargetStatus(list);
+            transaction.setExternalStatus("testExStatus");
+            transaction.setLogicStatus("testLogic");
 
             // Put the customer data into an Amazon DynamoDB table.
             custTable.putItem(transaction);
@@ -168,6 +168,34 @@ class ApiControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk();
+    }
+
+    @Test
+    @Order(8)
+    void getExternalStatusTestOk(){
+        String process = "INVIO_PEC";
+        String currStato = "BOOKED";
+        String clientId = "C050";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/decodeLogical/" +process +"/"+ currStato +"?clientId="+clientId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+    }
+
+    @Test
+    @Order(8)
+    void getExternalStatusTestKO(){
+        String process = "INVIO_PEC_KO";
+        String currStato = "BOOKED";
+        String clientId = "C050";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/decodeLogical/" +process +"/"+ currStato +"?clientId="+clientId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
 }
