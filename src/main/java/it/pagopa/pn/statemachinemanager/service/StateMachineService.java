@@ -64,7 +64,7 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-	                sLog = "ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = iCase + " - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 1: { // processId + clientId + anyStatus
@@ -74,19 +74,19 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-	                sLog = "ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = iCase + " - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 2: { // processId + currStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-	                sLog = "ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = iCase + " - ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 3: { // processId + anyStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-	                sLog = "ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = iCase + " - ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				default:
