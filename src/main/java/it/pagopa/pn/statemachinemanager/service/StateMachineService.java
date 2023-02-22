@@ -60,16 +60,9 @@ public class StateMachineService {
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
 
-            if (!results.hasNext()) {
-
-                queryConditional = QueryConditional.keyEqualTo(anyKey);
-                results = transactionTable.query(queryConditional).items().iterator();
-            }
-
-
             List<Transaction> result = new ArrayList<>();
 
-            while (results.hasNext()) {
+            if (results.hasNext()) {
                 notFound = false;
                 Transaction rec = results.next();
                 if (rec.getTargetStatus().contains(nextStatus)) {
@@ -78,7 +71,23 @@ public class StateMachineService {
                 log.info("The process of the movie is " + rec.getProcessClientId());
                 log.info("The reqeust status to validate  is " + nextStatus);
                 log.info("The target status information  is " + rec.getTargetStatus());
+            }
 
+            if(notFound){
+                queryConditional = QueryConditional.keyEqualTo(anyKey);
+                results = transactionTable.query(queryConditional).items().iterator();
+
+                if (results.hasNext()) {
+                    notFound = false;
+                    Transaction rec = results.next();
+                    if (rec.getTargetStatus().contains(nextStatus)) {
+                        result.add(rec);
+                    }
+                    log.info("The process of the movie is " + rec.getProcessClientId());
+                    log.info("The reqeust status to validate  is " + nextStatus);
+                    log.info("The target status information  is " + rec.getTargetStatus());
+
+                }
             }
 
             if (notFound) {
