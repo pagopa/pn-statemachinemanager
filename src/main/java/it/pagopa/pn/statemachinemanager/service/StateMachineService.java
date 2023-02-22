@@ -75,19 +75,11 @@ public class StateMachineService {
 	                break;
 				}
 				case 2: { // processId + currStatus
-		            if (clientId.isEmpty()) {
-		            	iCase = 2;
-		            	continue;
-		            }
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
 	                break;
 				}
 				case 3: { // processId + anyStatus
-		            if (clientId.isEmpty()) {
-		            	iCase = 3;
-		            	continue;
-		            }
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
 	                break;
