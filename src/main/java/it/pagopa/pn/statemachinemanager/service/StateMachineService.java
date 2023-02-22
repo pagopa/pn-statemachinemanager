@@ -53,20 +53,16 @@ public class StateMachineService {
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
 
             Key fromKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-            Key toKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
+            Key anyKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
 
-            QueryConditional queryConditional = QueryConditional.sortBetween(fromKey, toKey);
+            QueryConditional queryConditional = QueryConditional.keyEqualTo(fromKey);
+            //QueryConditional queryConditional = QueryConditional. keyEqualTo(fromKey). sortBetween(fromKey, toKey);
             // Get items in the table and write out the ID value.
             Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
 
             if (!results.hasNext()) {
 
-                processClientId.setProcessClientId(processId);
-
-                fromKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                toKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-
-                queryConditional = QueryConditional.sortBetween(fromKey, toKey);
+                queryConditional = QueryConditional.keyEqualTo(anyKey);
                 results = transactionTable.query(queryConditional).items().iterator();
             }
 
@@ -115,7 +111,7 @@ public class StateMachineService {
 
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
 
-            Key key = Key.builder().partitionValue(processClientId.getProcessClientId()).build();
+            Key key = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
 
             QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
 
