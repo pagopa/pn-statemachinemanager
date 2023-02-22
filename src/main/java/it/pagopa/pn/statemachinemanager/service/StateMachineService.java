@@ -96,17 +96,16 @@ public class StateMachineService {
                 results = transactionTable.query(queryConditional).items().iterator();
 
                 if (results.hasNext()) {
-                    notFound = false;
                     Transaction rec = results.next();
                     if (rec.getTargetStatus().contains(nextStatus)) {
+                        notFound = false;
                         log.debug("Valid transition: "+sLog);
                     	boAllowed = true;
                     	break;
                     }
-                    log.debug("Invalid transition: "+sLog);
                 }
                 else {
-                	log.debug("Item not found: "+sLog);
+                	log.debug("Invalid transition: "+sLog);
                 }
                 iCase ++;
             }
