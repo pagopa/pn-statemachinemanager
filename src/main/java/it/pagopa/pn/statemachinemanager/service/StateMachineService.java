@@ -69,7 +69,7 @@ public class StateMachineService {
 				}
 				case 1: { // processId + clientId + anyStatus
 		            if (clientId.isEmpty()) {
-		            	iCase = 3;
+		            	iCase = 2;
 		            	continue;
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
