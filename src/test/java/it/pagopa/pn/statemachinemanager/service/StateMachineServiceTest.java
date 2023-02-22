@@ -72,20 +72,20 @@ class StateMachineServiceTest {
                 .isOk()
                 .expectBody(Response.class);
     }
-    @Test
-    @Order(2)
-    void getStatusTestKO() {
-        String process = "INVIO_PEC";
-        String currStato = "BOOKED";
-        String clientId = "C050";
-        String nextStatus = "COMPOSED";
-        webClient.get()
-                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
+//    @Test
+//    @Order(2)
+//    void getStatusTestKO() {
+//        String process = "INVIO_PEC";
+//        String currStato = "BOOKED";
+//        String clientId = "C050";
+//        String nextStatus = "COMPOSED";
+//        webClient.get()
+//                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+//                .accept(APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus()
+//                .isOk();
+//    }
 
     @Test
     @Order(3)

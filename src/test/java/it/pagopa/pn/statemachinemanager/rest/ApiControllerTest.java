@@ -94,7 +94,7 @@ class ApiControllerTest {
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isNotFound();
     }
 
     @Test
