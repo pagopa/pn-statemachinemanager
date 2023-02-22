@@ -99,10 +99,11 @@ public class StateMachineService {
                     notFound = false;
                     Transaction rec = results.next();
                     if (rec.getTargetStatus().contains(nextStatus)) {
+                        log.debug("Valid transition: "+sLog);
                     	boAllowed = true;
                     	break;
                     }
-                    log.debug("Valid trasnition: "+sLog);
+                    log.debug("Invalid transition: "+sLog);
                 }
                 else {
                 	log.debug("Item not found: "+sLog);
