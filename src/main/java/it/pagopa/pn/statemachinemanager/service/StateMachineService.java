@@ -73,7 +73,7 @@ public class StateMachineService {
                 log.info("The target status information  is " + rec.getTargetStatus());
             }
 
-            if(notFound){
+            if(notFound || result.isEmpty()){
                 queryConditional = QueryConditional.keyEqualTo(anyKey);
                 results = transactionTable.query(queryConditional).items().iterator();
 
