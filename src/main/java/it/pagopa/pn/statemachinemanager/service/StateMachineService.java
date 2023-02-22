@@ -54,6 +54,7 @@ public class StateMachineService {
             QueryConditional queryConditional;
             Iterator<Transaction> results;
             
+            String sLog;
             while(notFound && iCase < 4) {
             	switch (iCase) {
 				case 0: { // processId + clientId + currStatus
@@ -63,6 +64,7 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
+	                sLog = "ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 1: { // processId + clientId + anyStatus
@@ -72,16 +74,19 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
+	                sLog = "ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 2: { // processId + currStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
+	                sLog = "ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 3: { // processId + anyStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
+	                sLog = "ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				default:
@@ -97,9 +102,10 @@ public class StateMachineService {
                     	boAllowed = true;
                     	break;
                     }
-                    log.info("The process of the movie is " + rec.getProcessClientId());
-                    log.info("The reqeust status to validate  is " + nextStatus);
-                    log.info("The target status information  is " + rec.getTargetStatus());
+                    log.debug("Valid trasnition: "+sLog);
+                }
+                else {
+                	log.debug("Item not found: "+sLog);
                 }
                 iCase ++;
             }
