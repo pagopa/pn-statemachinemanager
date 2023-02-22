@@ -105,7 +105,7 @@ public class StateMachineService {
                     }
                 }
                 else {
-                	log.debug("Item not found: "+sLog);
+                	log.debug("Invalid transition: "+sLog);
                 }
                 iCase ++;
             }
