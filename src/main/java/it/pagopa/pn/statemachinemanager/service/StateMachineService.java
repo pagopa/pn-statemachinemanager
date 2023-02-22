@@ -55,7 +55,7 @@ public class StateMachineService {
             Iterator<Transaction> results;
             
             String sLog;
-            while(notFound && iCase < 4) {
+            while(iCase < 4) {
             	switch (iCase) {
 				case 0: { // processId + clientId + currStatus
 		            if (clientId.isEmpty()) {
@@ -96,16 +96,17 @@ public class StateMachineService {
                 results = transactionTable.query(queryConditional).items().iterator();
 
                 if (results.hasNext()) {
+                    notFound = false;
                     Transaction rec = results.next();
                     if (rec.getTargetStatus().contains(nextStatus)) {
-                        notFound = false;
                         log.debug("Valid transition: "+sLog);
                     	boAllowed = true;
                     	break;
                     }
+                    log.debug("Invalid transition: "+sLog);
                 }
                 else {
-                	log.debug("Invalid transition: "+sLog);
+                	log.debug("Item not found: "+sLog);
                 }
                 iCase ++;
             }
