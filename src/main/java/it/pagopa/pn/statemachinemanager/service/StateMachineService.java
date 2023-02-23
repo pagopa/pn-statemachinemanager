@@ -33,10 +33,10 @@ public class StateMachineService {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
     }
 
-    public static final String SEPARATORE = "#";
+    private static final String SEPARATORE = "#";
+    private static String anyStatus = "_any_";
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
-        String anyStatus = "_any_";
 
         this.validaRequest(processId, currStatus, nextStatus);
         Response resp = new Response();
@@ -64,7 +64,7 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-	                sLog = iCase + " - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = "Validate - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 1: { // processId + clientId + anyStatus
@@ -74,19 +74,19 @@ public class StateMachineService {
 		            }
 	                processClientId.setProcessClientId(processId + SEPARATORE + clientId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-	                sLog = iCase + " - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = "Validate - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 2: { // processId + currStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-	                sLog = iCase + " - ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = "Validate - ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				case 3: { // processId + anyStatus
 	                processClientId.setProcessClientId(processId);
 	                oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-	                sLog = iCase + " - ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
+	                sLog = "Validate - ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\" nextStatus=\""+nextStatus+"\"";
 	                break;
 				}
 				default:
@@ -131,29 +131,71 @@ public class StateMachineService {
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();
 
-        if (!clientId.isEmpty()) {
-            processClientId.setProcessClientId(processId + SEPARATORE + clientId);
-        } else {
-            processClientId.setProcessClientId(processId);
-        }
-
         try {
+        	boolean notFound = true;
+            int iCase = 0;
 
             DynamoDbTable<Transaction> transactionTable = dynamoDbEnhancedClient.table(pnSmmTableClientStates, TableSchema.fromBean(Transaction.class));
 
-            Key key = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
+            Key oKey;
+            QueryConditional queryConditional;
+            Iterator<Transaction> results;
+            
+            String sLog;
+            while(iCase < 4) {
+            	switch (iCase) {
+    			case 0: { // processId + clientId + currStatus
+    	            if (clientId.isEmpty()) {
+    	            	iCase = 2;
+    	            	continue;
+    	            }
+                    processClientId.setProcessClientId(processId + SEPARATORE + clientId);
+                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
+                    sLog = "Decode - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+currStatus+"\"";
+                    break;
+    			}
+    			case 1: { // processId + clientId + anyStatus
+    	            if (clientId.isEmpty()) {
+    	            	iCase = 2;
+    	            	continue;
+    	            }
+                    processClientId.setProcessClientId(processId + SEPARATORE + clientId);
+                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
+                    sLog = "Decode - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\"";
+                    break;
+    			}
+    			case 2: { // processId + currStatus
+                    processClientId.setProcessClientId(processId);
+                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
+                    sLog = "Decode - ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\"";
+                    break;
+    			}
+    			case 3: { // processId + anyStatus
+                    processClientId.setProcessClientId(processId);
+                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
+                    sLog = "Decode - ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\"";
+                    break;
+    			}
+    			default:
+    				throw new IllegalArgumentException("Unexpected value: " + iCase);
+    			}
+                queryConditional = QueryConditional.keyEqualTo(oKey);
+                results = transactionTable.query(queryConditional).items().iterator();
 
-            QueryConditional queryConditional = QueryConditional.keyEqualTo(key);
+                if (results.hasNext()) {
+                    notFound = false;
+                    Transaction element = results.next();
+                    resp.setExternalStatus(element.getExternalStatus());
+                    resp.setLogicStatus(element.getLogicStatus());
+                    log.debug("Invalid transition: "+sLog);
+                }
+                else {
+                	log.debug("Item not found: "+sLog);
+                }
+                iCase ++;
+            }
 
-            Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
-
-            if(results.hasNext()){
-                Transaction element = results.next();
-                resp.setExternalStatus(element.getExternalStatus());
-                resp.setLogicStatus(element.getLogicStatus());
-
-            } else {
-                log.info("element not found ");
+            if (notFound) {
                 throw new StateManagerException.ErrorRequestValidateNotFoundCurrentStatus(processClientId.getProcessClientId());
             }
 
