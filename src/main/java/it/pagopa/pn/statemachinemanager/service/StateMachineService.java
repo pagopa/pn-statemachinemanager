@@ -142,11 +142,11 @@ public class StateMachineService {
             Iterator<Transaction> results;
             
             String sLog;
-            while(iCase < 4) {
+            while(iCase < 2) {
             	switch (iCase) {
     			case 0: { // processId + clientId + currStatus
     	            if (clientId.isEmpty()) {
-    	            	iCase = 2;
+    	            	iCase = 1;
     	            	continue;
     	            }
                     processClientId.setProcessClientId(processId + SEPARATORE + clientId);
@@ -155,25 +155,9 @@ public class StateMachineService {
                     break;
     			}
     			case 1: { // processId + clientId + anyStatus
-    	            if (clientId.isEmpty()) {
-    	            	iCase = 2;
-    	            	continue;
-    	            }
-                    processClientId.setProcessClientId(processId + SEPARATORE + clientId);
-                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-                    sLog = "Decode - ProcessId=\""+processId+"\" ClientId=\""+clientId+"\" currStatus=\""+anyStatus+"\"";
-                    break;
-    			}
-    			case 2: { // processId + currStatus
                     processClientId.setProcessClientId(processId);
                     oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
                     sLog = "Decode - ProcessId=\""+processId+"\" currStatus=\""+currStatus+"\"";
-                    break;
-    			}
-    			case 3: { // processId + anyStatus
-                    processClientId.setProcessClientId(processId);
-                    oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(anyStatus).build();
-                    sLog = "Decode - ProcessId=\""+processId+"\" currStatus=\""+anyStatus+"\"";
                     break;
     			}
     			default:
@@ -187,7 +171,7 @@ public class StateMachineService {
                     Transaction element = results.next();
                     resp.setExternalStatus(element.getExternalStatus());
                     resp.setLogicStatus(element.getLogicStatus());
-                    log.debug("Invalid transition: "+sLog);
+                    log.debug("Item found: "+sLog);
                 }
                 else {
                 	log.debug("Item not found: "+sLog);
