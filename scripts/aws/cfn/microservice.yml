@@ -111,7 +111,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: 'IAM Managed Policy for StateMachine Manager'
-      ManagedPolicyName: !Ref PnSmManagedPolicyName
+      # ManagedPolicyName: !Ref PnSmManagedPolicyName
       PolicyDocument: 
         Version: 2012-10-17
         Statement:
