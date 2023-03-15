@@ -49,7 +49,6 @@ Resources:
         SSEEnabled: true
         SSEType: 'KMS'
       TableClass: 'STANDARD'
-    DeletionPolicy: Retain
 
 Outputs:
 
