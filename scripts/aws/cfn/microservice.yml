@@ -131,7 +131,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-alarm.yaml"
       Parameters:
-        MicroServiceName: !Sub '${ProjectName}-state-machine-manager'
+        MicroserviceName: !Sub '${ProjectName}-state-machine-manager'
         EvaluationPeriod: '10'
         DatapointsToAlarm: '1'
         Threshold: '1'
