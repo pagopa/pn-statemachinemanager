@@ -126,15 +126,15 @@ Resources:
               - !Sub "${PnSmTableArnClientStates}"
 
 
-  # StateMachineManagerMicroserviceAlarm:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-alarm.yaml"
-  #     Parameters:
-  #       MicroServiceName: !Sub '${ProjectName}-state-machine-manager'
-  #       EvaluationPeriod: '10'
-  #       DatapointsToAlarm: '1'
-  #       Threshold: '1'
+  StateMachineManagerMicroserviceAlarm:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-alarm.yaml"
+      Parameters:
+        MicroServiceName: !Sub '${ProjectName}-state-machine-manager'
+        EvaluationPeriod: '10'
+        DatapointsToAlarm: '1'
+        Threshold: '1'
 
   StateMachineManagerMicroserviceAlarmDashboard:
     Type: AWS::CloudFormation::Stack
@@ -142,7 +142,7 @@ Resources:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
         DashboardName: 'state-machine-manager-msvc'
-        # AlarmArns: !GetAtt StateMachineManagerMicroserviceAlarm.Outputs.MicroserviceAlarmArn
+        AlarmArns: !GetAtt StateMachineManagerMicroserviceAlarm.Outputs.MicroserviceAlarmArn
         DynamoDBTableNames: !Ref PnSmTableNameClientStates
         # RestApiStageArns:
         # RestApiNames:
