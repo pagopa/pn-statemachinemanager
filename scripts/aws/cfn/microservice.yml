@@ -89,8 +89,8 @@ Resources:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-state-machine-manager'
-        CpuValue: 512
-        MemoryAmount: 2GB
+        CpuValue: 1024
+        MemoryAmount: 4GB
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
@@ -141,7 +141,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
-        DashboardName: 'state-machine-manager-msvc'
+        DashboardName: !Sub '${ProjectName}-state-machine-manager'
         AlarmArns: !GetAtt StateMachineManagerMicroserviceAlarm.Outputs.MicroserviceAlarmArn
         DynamoDBTableNames: !Ref PnSmTableNameClientStates
         # RestApiStageArns:
