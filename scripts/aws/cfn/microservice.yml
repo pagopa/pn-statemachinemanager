@@ -56,9 +56,10 @@ Parameters:
     Type: String
     Description: 'Base URL of the load balancer where the service is going to be reachable'
 
-  # NetworkLoadBalancerLink:
-  #   Type: String
-  #   Description: 'network load balancer link for API-GW'
+  NetworkLoadBalancerLink:
+    Type: String
+    Description: 'network load balancer link for API-GW'
+    Default: ''
   
   # LogsKinesisSourceStreamArn:
   #   Type: String
@@ -90,8 +91,8 @@ Resources:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-state-machine-manager'
-        CpuValue: 512
-        MemoryAmount: 2GB
+        CpuValue: 1024
+        MemoryAmount: 4GB
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
@@ -127,4 +128,30 @@ Resources:
               - !Sub "${PnSmTableArnClientStates}"
 
 
-        
+  StateMachineManagerMicroserviceAlarm:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-alarm.yaml"
+      Parameters:
+        MicroserviceName: !Sub '${ProjectName}-state-machine-manager'
+        EvaluationPeriod: '10'
+        DatapointsToAlarm: '1'
+        Threshold: '1'
+
+  StateMachineManagerMicroserviceAlarmDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      Parameters:
+        DashboardName: !Sub '${ProjectName}-state-machine-manager'
+        AlarmArns: !GetAtt StateMachineManagerMicroserviceAlarm.Outputs.MicroserviceAlarmArn
+        DynamoDBTableNames: !Ref PnSmTableNameClientStates
+        # RestApiStageArns:
+        # RestApiNames:
+        # QueueArns:
+        # LambdaArns:
+        # KinesisDataArns:
+        # KinesisFirehoseArns:
+        # EventRuleArns:
+        # BucketNames:
+        # LogGroupsNames:
