@@ -92,7 +92,7 @@ Resources:
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-state-machine-manager'
         CpuValue: 1024
-        MemoryAmount: 4GB
+        MemoryAmount: 8GB
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
