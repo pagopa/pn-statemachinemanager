@@ -103,6 +103,11 @@ public class StateMachineService {
                     	boAllowed = true;
                     	break;
                     }
+                    else if (rec.getTargetStatus().contains(anyStatus)) {
+                        log.debug("to any transition: "+sLog);
+                    	boAllowed = true;
+                    	break;
+                    }
                     log.debug("Invalid transition: "+sLog);
                 }
                 else {

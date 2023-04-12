@@ -50,6 +50,15 @@ class StateMachineServiceTest {
             // Put the customer data into an Amazon DynamoDB table.
             custTable.putItem(transaction);
 
+            list = new ArrayList<>();
+            list.add("_any_");
+            transaction.setProcessClientId("INVIO_PEC#C050");
+            transaction.setCurrStatus("SENT");
+            transaction.setTargetStatus(list);
+
+            // Put the customer data into an Amazon DynamoDB table.
+            custTable.putItem(transaction);
+
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -72,20 +81,39 @@ class StateMachineServiceTest {
                 .isOk()
                 .expectBody(Response.class);
     }
-//    @Test
-//    @Order(2)
-//    void getStatusTestKO() {
-//        String process = "INVIO_PEC";
-//        String currStato = "BOOKED";
-//        String clientId = "C050";
-//        String nextStatus = "COMPOSED";
-//        webClient.get()
-//                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
-//                .accept(APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus()
-//                .isOk();
-//    }
+    @Test
+    @Order(2)
+    void getStatusToAnyOk() {
+        String process = "INVIO_PEC";
+        String currStato = "SENT";
+        String clientId = "C050";
+        String nextStatus = "fake";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.allowed").isEqualTo("true");
+    }
+
+    @Test
+    @Order(2)
+    void getStatusToAnyKO() {
+        String process = "INVIO_PEC";
+        String currStato = "BOOKED";
+        String clientId = "C050";
+        String nextStatus = "fake";
+        webClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" +process +"/"+ currStato +"?clientId="+clientId + "&nextStatus="+ nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.allowed").isEqualTo("false");
+    }
 
     @Test
     @Order(3)
