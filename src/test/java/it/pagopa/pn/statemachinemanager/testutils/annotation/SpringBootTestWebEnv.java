@@ -1,7 +1,7 @@
-package it.pagopa.pn.statemachinemanager.annotation;
+package it.pagopa.pn.statemachinemanager.testutils.annotation;
 
 
-import it.pagopa.pn.statemachinemanager.localstack.LocalStackTestConfig;
+import it.pagopa.pn.statemachinemanager.testutils.localstack.LocalStackTestConfig;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
