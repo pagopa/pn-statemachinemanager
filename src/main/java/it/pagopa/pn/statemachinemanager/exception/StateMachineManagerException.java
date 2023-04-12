@@ -1,9 +1,9 @@
-package it.pagopa.pn.statemachinemanager.repositorymanager.constant.exception;
+package it.pagopa.pn.statemachinemanager.exception;
 
-public class StateManagerException extends RuntimeException{
+public class StateMachineManagerException extends RuntimeException {
 
 
-    public StateManagerException() {
+    public StateMachineManagerException() {
         super("Generic exception in StateManagerService");
     }
 
@@ -22,17 +22,10 @@ public class StateManagerException extends RuntimeException{
         }
     }
 
-    public static class ErrorRequestValidateProccesId extends RuntimeException {
+    public static class ErrorRequestValidateProcessId extends RuntimeException {
 
-        public ErrorRequestValidateProccesId(String message) {
-            super(String.format("Errore validazione dati proccessId : '%s'", message));
-        }
-    }
-
-    public static class ErrorRequestValidateNotFoundProcessClientId extends RuntimeException {
-
-        public ErrorRequestValidateNotFoundProcessClientId(String message) {
-            super(String.format("Errore validazione dati proccessId : '%s'", message));
+        public ErrorRequestValidateProcessId(String message) {
+            super(String.format("Errore validazione dati processId : '%s'", message));
         }
     }
 
@@ -49,6 +42,7 @@ public class StateManagerException extends RuntimeException{
             super(String.format("NotFound currentStatus : '%s'", message));
         }
     }
+
     public static class ErrorRequestValidateNextStatus extends RuntimeException {
 
         public ErrorRequestValidateNextStatus(String message) {
