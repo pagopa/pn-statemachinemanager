@@ -42,13 +42,15 @@ Resources:
           KeyType: 'RANGE'
       #KinesisStreamSpecification:
       #  StreamArn: 'String'
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      BillingMode: 'PAY_PER_REQUEST'
       SSESpecification:
         SSEEnabled: true
         SSEType: 'KMS'
       TableClass: 'STANDARD'
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
 
 Outputs:
 
