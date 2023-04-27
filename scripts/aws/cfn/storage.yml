@@ -30,6 +30,7 @@ Resources:
   PnSmTableClientStates:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: 'pn-SmStates'
       AttributeDefinitions:
         - AttributeName: 'processClientId'
           AttributeType: 'S'
