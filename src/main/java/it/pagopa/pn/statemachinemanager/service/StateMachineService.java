@@ -29,6 +29,7 @@ public class StateMachineService {
 
     private static final String SEPARATORE = "#";
     private static final String ANY_STATUS = "_any_";
+    private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
 
@@ -56,8 +57,7 @@ public class StateMachineService {
                         }
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" ClientId=\"" + clientId + "\" currStatus=\"" + currStatus +
-                               "\" nextStatus=\"" + nextStatus + "\"";
+                        sLog=String.format(S_LOG_DEF, processId, clientId, currStatus, nextStatus);
                         break;
                     }
                     case 1: { // processId + clientId + anyStatus
@@ -67,22 +67,19 @@ public class StateMachineService {
                         }
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" ClientId=\"" + clientId + "\" currStatus=\"" + ANY_STATUS +
-                               "\" nextStatus=\"" + nextStatus + "\"";
+                        sLog=String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus);
                         break;
                     }
                     case 2: { // processId + currStatus
                         processClientId.setProcessClientId(processId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" currStatus=\"" + currStatus + "\" nextStatus=\"" + nextStatus +
-                               "\"";
+                        sLog=String.format(S_LOG_DEF, processId, "", currStatus, nextStatus);
                         break;
                     }
                     case 3: { // processId + anyStatus
                         processClientId.setProcessClientId(processId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" currStatus=\"" + ANY_STATUS + "\" nextStatus=\"" + nextStatus +
-                               "\"";
+                        sLog=String.format(S_LOG_DEF, processId, "", ANY_STATUS, nextStatus);
                         break;
                     }
                     default:
