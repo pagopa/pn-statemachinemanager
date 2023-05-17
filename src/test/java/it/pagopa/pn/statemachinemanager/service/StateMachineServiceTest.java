@@ -50,6 +50,13 @@ class StateMachineServiceTest {
             // Put the customer data into an Amazon DynamoDB table.
             transactionDynamoDbTable.putItem(transaction);
 
+            transaction.setProcessClientId("INVIO_PEC");
+            transaction.setCurrStatus("BOOKED");
+            transaction.setTargetStatus(list);
+
+            // Put the customer data into an Amazon DynamoDB table.
+            transactionDynamoDbTable.putItem(transaction);
+
             list = new ArrayList<>();
             list.add("_any_");
             transaction.setProcessClientId("INVIO_PEC#C050");
@@ -57,6 +64,12 @@ class StateMachineServiceTest {
             transaction.setTargetStatus(list);
 
             // Put the customer data into an Amazon DynamoDB table.
+            transactionDynamoDbTable.putItem(transaction);
+
+            transaction.setProcessClientId("INVIO_PEC");
+            transaction.setCurrStatus("SENT");
+            transaction.setTargetStatus(list);
+
             transactionDynamoDbTable.putItem(transaction);
 
         } catch (DynamoDbException e) {
@@ -83,6 +96,67 @@ class StateMachineServiceTest {
     }
 
     @Test
+    void getStatusTestNoCurrStatus() {
+        var process = "INVIO_PEC";
+        String currStato = "";
+        var clientId = "C050";
+        var nextStatus = "VALIDATE";
+        webTestClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
+                        "&nextStatus=" + nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getStatusTestNoNextStatus() {
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var clientId = "C050";
+        var nextStatus = "";
+        webTestClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
+                        "&nextStatus=" + nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getStatusTestNoProcessId() {
+        var process = "";
+        var currStato = "BOOKED";
+        var clientId = "C050";
+        var nextStatus = "VALIDATE";
+        webTestClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
+                        "&nextStatus=" + nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getStatusTestNoClientId() {
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var clientId = "";
+        var nextStatus = "VALIDATE";
+        webTestClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId
+                        + "&nextStatus=" + nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Response.class);
+    }
+
+    @Test
     void getStatusToAnyOk() {
         var process = "INVIO_PEC";
         var currStato = "SENT";
@@ -98,6 +172,24 @@ class StateMachineServiceTest {
                      .expectBody()
                      .jsonPath("$.allowed")
                      .isEqualTo("true");
+    }
+
+    @Test
+    void getStatusToAnyEmptyClientIdOk() {
+        var process = "INVIO_PEC";
+        var currStato = "SENT";
+        var clientId = "";
+        var nextStatus = "fake";
+        webTestClient.get()
+                .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
+                        "&nextStatus=" + nextStatus)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.allowed")
+                .isEqualTo("true");
     }
 
     @Test
@@ -122,7 +214,7 @@ class StateMachineServiceTest {
     void getStatusTestKOClientId() {
         var process = "INVIO_PEC";
         var currStato = "BOOKED";
-        var clientId = "C05";
+        var clientId = "FAKE";
         var nextStatus = "COMPOSED";
         webTestClient.get()
                      .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
