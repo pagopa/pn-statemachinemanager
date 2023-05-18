@@ -30,9 +30,13 @@ public class StateMachineService {
     private static final String SEPARATORE = "#";
     private static final String ANY_STATUS = "_any_";
 
-    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
+    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
-        this.validaRequest(processId, currStatus, nextStatus);
+        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
+            log.info("Errore validazione dati nextStatus : " + nextStatus);
+            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
+        }
+
         Response resp = new Response();
         Transaction processClientId = new Transaction();
 
@@ -126,7 +130,6 @@ public class StateMachineService {
 
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
 
-        this.validateRequest(processId, currStatus);
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();
 
@@ -186,30 +189,6 @@ public class StateMachineService {
             log.info("try catch error ");
             System.exit(1);
             return resp;
-        }
-    }
-
-    private void validaRequest(String processId, String currStatus, String nextStatus) {
-        if (processId == null || processId.isEmpty() || processId.isBlank()) {
-            log.info("Errore validazione dati processId : " + processId);
-            throw new StateMachineManagerException.ErrorRequestValidateProcessId(processId);
-        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
-            log.info("Errore validazione dati currStatus : " + currStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateCurrentStatus(currStatus);
-
-        } else if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
-            log.info("Errore validazione dati nextStatus : " + nextStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
-        }
-    }
-
-    private void validateRequest(String processId, String currStatus) {
-        if (processId == null || processId.isEmpty() || processId.isBlank()) {
-            log.info("Errore validazione dati processId : " + processId);
-            throw new StateMachineManagerException.ErrorRequestValidateProcessId(processId);
-        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
-            log.info("Errore validazione dati currStatus : " + currStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateCurrentStatus(currStatus);
         }
     }
 }

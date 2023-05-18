@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
@@ -32,6 +33,7 @@ class ApiControllerTest {
     @Value("${pn.sm.table.transaction}")
     private String pnSmTableTransaction;
 
+    private final String URI = "/statemachinemanager/validate/{process}/{currStato}";
     @BeforeEach
     void setUp() {
         try {
@@ -77,12 +79,36 @@ class ApiControllerTest {
         System.out.println("Customer data added to the table with id id101");
     }
 
+    private WebTestClient.ResponseSpec webClientTestCall(String process, String currStato, String clientId, String nextStatus) {
+        return webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(URI)
+                        .queryParam("clientId", clientId)
+                        .queryParam("nextStatus", nextStatus)
+                        .build(process, currStato))
+                .accept(APPLICATION_JSON)
+                .exchange();
+    }
+
     @Test
-    void getStatusTest() {
+    void getStatusTestAllowed() {
         var process = "INVIO_PEC";
         var currStato = "BOOKED";
         var clientId = "C050";
         var nextStatus = "VALIDATE";
+        webClientTestCall(process, currStato, clientId, nextStatus)
+                     .expectStatus()
+                     .isOk()
+                     .expectBody()
+                     .jsonPath("$.allowed")
+                     .isEqualTo("true");
+    }
+
+    @Test
+    void getStatusTestNotAllowed() {
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var clientId = "C050";
+        var nextStatus = "SENT";
         webTestClient.get()
                      .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
                       "&nextStatus=" + nextStatus)
@@ -90,37 +116,20 @@ class ApiControllerTest {
                      .exchange()
                      .expectStatus()
                      .isOk()
-                     .expectBody(Response.class);
+                     .expectBody()
+                     .jsonPath("$.allowed")
+                     .isEqualTo("false");
     }
 
     @Test
-    void getStatusTestKO() {
+    void getStatusTestEmptyClientId() {
         var process = "INVIO_PEC";
-        var currStato = "BOOKED";
+        var currStato = "SENT";
         var clientId = "C050";
         var nextStatus = "COMPOSED";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
-                      "&nextStatus=" + nextStatus)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
-                     .expectStatus()
-                     .isOk();
-    }
-
-    @Test
-    void getStatusTestKOClientId() {
-        var process = "INVIO_PEC";
-        var currStato = "BOOKD";
-        var clientId = "null";
-        var nextStatus = "COMPOSED";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
-                      "&nextStatus=" + nextStatus)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
-                     .expectStatus()
-                     .isNotFound();
+        webClientTestCall(process, currStato, clientId, nextStatus)
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -128,57 +137,60 @@ class ApiControllerTest {
         var currStato = "BOOKED";
         var clientId = "C05";
         var nextStatus = "COMPOSED";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + null + "/" + currStato + "?clientId=" + clientId +
-                      "&nextStatus=" + nextStatus)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
+        webClientTestCall(null, currStato, clientId, nextStatus)
                      .expectStatus()
                      .isNotFound();
     }
 
     @Test
-    void getStatusTestKOCurrenStatus() {
+    void getStatusTestKOCurrentStatus() {
         var process = "PEC";
-        //String currStato = null;
         var clientId = "C05";
         var nextStatus = "COMPOSED";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/?clientId=" + clientId + "&nextStatus=" +
-                      nextStatus)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
+        webClientTestCall(process, null, clientId, nextStatus)
                      .expectStatus()
                      .isNotFound();
     }
 
+    @Test
+    void getStatusTestKOClientId() {
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var nextStatus = "COMPOSED";
+        webClientTestCall(process, currStato, null, nextStatus)
+                .expectStatus()
+                .isBadRequest();
+    }
     @Test
     void getStatusTestKONextStatus() {
         var process = "PEC";
-        var currStato = "BOOKE";
+        var currStato = "BOOKED";
         var clientId = "C05";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
-                      "&nextStatus=" + null)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
-                     .expectStatus()
-                     .isNotFound();
+        webClientTestCall(process, currStato, clientId, null)
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
-    void getStatusTestANYCurrStatus() {
+    void getStatusTestANY() {
         var process = "INVIO_PEC";
         var currStato = "BOOKED";
         var clientId = "C050";
         var nextStatus = "INTERNAL_ERROR";
-        webTestClient.get()
-                     .uri("http://localhost:8080/statemachinemanager/validate/" + process + "/" + currStato + "?clientId=" + clientId +
-                      "&nextStatus=" + nextStatus)
-                     .accept(APPLICATION_JSON)
-                     .exchange()
+        webClientTestCall(process, currStato, clientId, nextStatus)
                      .expectStatus()
                      .isOk();
+    }
+
+    @Test
+    void getStatusTestANYEmptyClientId() {
+        var process = "INVIO_PEC";
+        var currStato = "SENT";
+        var clientId = "";
+        var nextStatus = "INTERNAL_ERROR";
+        webClientTestCall(process, currStato, clientId, nextStatus)
+                .expectStatus()
+                .isOk();
     }
 
     @Test
