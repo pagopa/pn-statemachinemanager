@@ -82,6 +82,9 @@ Parameters:
     Description: 'Nome della managed policy associata alla state machine'
     Default: 'PnSmManagedPolicyName'
   
+  LogAlarmStrategy:
+    Type: String
+    Default: 'FATAL'
 
 Resources:
 
@@ -107,6 +110,7 @@ Resources:
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         # CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
+        LogAlarmStrategyV1: !Ref LogAlarmStrategy
         # HealthCheckPath: 
 
   
