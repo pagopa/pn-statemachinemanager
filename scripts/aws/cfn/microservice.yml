@@ -125,7 +125,8 @@ Resources:
         # CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
-        # HealthCheckPath:
+        LoadBalancingAlgorithm: round_robin
+        # HealthCheckPath: 
         MinTasksNumber: !Ref MinTasksNumber
         MaxTasksNumber: !Ref MaxTasksNumber
         AutoscalingThreshold: !Ref AutoscalingThreshold
