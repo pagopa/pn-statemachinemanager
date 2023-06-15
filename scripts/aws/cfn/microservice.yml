@@ -111,6 +111,7 @@ Resources:
         # CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
+        LoadBalancingAlgorithm: round_robin
         # HealthCheckPath: 
 
   
