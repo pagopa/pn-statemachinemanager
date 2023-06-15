@@ -126,7 +126,7 @@ Resources:
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
         LoadBalancingAlgorithm: round_robin
-        # HealthCheckPath: 
+        AutoscalingStrategy: REST-API
         MinTasksNumber: !Ref MinTasksNumber
         MaxTasksNumber: !Ref MaxTasksNumber
         AutoscalingThreshold: !Ref AutoscalingThreshold
