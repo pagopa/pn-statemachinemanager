@@ -86,6 +86,20 @@ Parameters:
     Type: String
     Default: 'FATAL'
 
+  AutoscalingThreshold:
+    Default: 70
+    Type: String
+
+  MinTasksNumber:
+    Default: 1
+    Type: Number
+    Description: minimum autoscaling number of tasks
+
+  MaxTasksNumber:
+    Default: 6
+    Type: Number
+    Description: maximum autoscaling number of tasks
+
 Resources:
 
   StateMachineManagerMicroservice:
@@ -113,6 +127,9 @@ Resources:
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
         LoadBalancingAlgorithm: round_robin
         # HealthCheckPath: 
+        MinTasksNumber: !Ref MinTasksNumber
+        MaxTasksNumber: !Ref MaxTasksNumber
+        AutoscalingThreshold: !Ref AutoscalingThreshold
 
   
   PnSmManagedPolicy:
