@@ -125,7 +125,7 @@ Resources:
         # CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         TaskRoleManagedPolicyArn: !Ref PnSmManagedPolicy
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
-        LoadBalancingAlgorithm: round_robin
+        #LoadBalancingAlgorithm: round_robin
         AutoscalingStrategy: REST-API
         MinTasksNumber: !Ref MinTasksNumber
         MaxTasksNumber: !Ref MaxTasksNumber
