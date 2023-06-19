@@ -87,11 +87,11 @@ Parameters:
     Default: 'FATAL'
 
   AutoscalingThreshold:
-    Default: 70
+    Default: 17500
     Type: String
 
   MinTasksNumber:
-    Default: 1
+    Default: 2
     Type: Number
     Description: minimum autoscaling number of tasks
 
