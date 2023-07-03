@@ -1,3 +1,7 @@
 {
-    "Parameters": {}
+    "Parameters": {
+        "MinTasksNumber": "2",
+        "MaxTasksNumber": "6",
+        "AutoscalingThreshold": "17500"
+    }
 }

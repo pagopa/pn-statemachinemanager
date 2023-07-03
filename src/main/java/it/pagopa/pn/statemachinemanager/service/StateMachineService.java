@@ -29,10 +29,15 @@ public class StateMachineService {
 
     private static final String SEPARATORE = "#";
     private static final String ANY_STATUS = "_any_";
+    private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
-    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) {
+    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
-        this.validaRequest(processId, currStatus, nextStatus);
+        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
+            log.info("Errore validazione dati nextStatus : " + nextStatus);
+            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
+        }
+
         Response resp = new Response();
         Transaction processClientId = new Transaction();
 
@@ -56,8 +61,7 @@ public class StateMachineService {
                         }
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" ClientId=\"" + clientId + "\" currStatus=\"" + currStatus +
-                               "\" nextStatus=\"" + nextStatus + "\"";
+                        sLog=String.format(S_LOG_DEF, processId, clientId, currStatus, nextStatus);
                         break;
                     }
                     case 1: { // processId + clientId + anyStatus
@@ -67,22 +71,19 @@ public class StateMachineService {
                         }
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" ClientId=\"" + clientId + "\" currStatus=\"" + ANY_STATUS +
-                               "\" nextStatus=\"" + nextStatus + "\"";
+                        sLog=String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus);
                         break;
                     }
                     case 2: { // processId + currStatus
                         processClientId.setProcessClientId(processId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" currStatus=\"" + currStatus + "\" nextStatus=\"" + nextStatus +
-                               "\"";
+                        sLog=String.format(S_LOG_DEF, processId, "", currStatus, nextStatus);
                         break;
                     }
                     case 3: { // processId + anyStatus
                         processClientId.setProcessClientId(processId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog = "Validate - ProcessId=\"" + processId + "\" currStatus=\"" + ANY_STATUS + "\" nextStatus=\"" + nextStatus +
-                               "\"";
+                        sLog=String.format(S_LOG_DEF, processId, "", ANY_STATUS, nextStatus);
                         break;
                     }
                     default:
@@ -126,7 +127,6 @@ public class StateMachineService {
 
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
 
-        this.validateRequest(processId, currStatus);
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();
 
@@ -186,30 +186,6 @@ public class StateMachineService {
             log.info("try catch error ");
             System.exit(1);
             return resp;
-        }
-    }
-
-    private void validaRequest(String processId, String currStatus, String nextStatus) {
-        if (processId == null || processId.isEmpty() || processId.isBlank()) {
-            log.info("Errore validazione dati processId : " + processId);
-            throw new StateMachineManagerException.ErrorRequestValidateProcessId(processId);
-        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
-            log.info("Errore validazione dati currStatus : " + currStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateCurrentStatus(currStatus);
-
-        } else if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
-            log.info("Errore validazione dati nextStatus : " + nextStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
-        }
-    }
-
-    private void validateRequest(String processId, String currStatus) {
-        if (processId == null || processId.isEmpty() || processId.isBlank()) {
-            log.info("Errore validazione dati processId : " + processId);
-            throw new StateMachineManagerException.ErrorRequestValidateProcessId(processId);
-        } else if (currStatus == null || currStatus.isEmpty() || currStatus.isBlank()) {
-            log.info("Errore validazione dati currStatus : " + currStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateCurrentStatus(currStatus);
         }
     }
 }
