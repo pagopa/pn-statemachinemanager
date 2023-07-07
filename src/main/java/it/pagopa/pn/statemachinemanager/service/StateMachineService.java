@@ -33,10 +33,14 @@ public class StateMachineService {
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
+        final String NEXT_STATUS = "nextStatus";
+
+        log.info("Checking {}", NEXT_STATUS);
         if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
-            log.info("Errore validazione dati nextStatus : " + nextStatus);
+            log.warn("{} failed error = ErrorRequestValidateNotFoundNextStatus, {} ", NEXT_STATUS, nextStatus);
             throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
         }
+        log.info("Checking {} passed", NEXT_STATUS);
 
         Response resp = new Response();
         Transaction processClientId = new Transaction();
@@ -119,7 +123,7 @@ public class StateMachineService {
             return resp;
 
         } catch (DynamoDbException e) {
-            log.error(e.getMessage());
+            log.error("DynamoDbException in queryTable method {}", e.getMessage());
             System.exit(1);
             return resp;
         }
@@ -182,8 +186,7 @@ public class StateMachineService {
             return resp;
 
         } catch (DynamoDbException e) {
-            log.error(e.getMessage());
-            log.info("try catch error ");
+            log.error("DynamoDbException in getExternalStatus method {}", e.getMessage());
             System.exit(1);
             return resp;
         }
