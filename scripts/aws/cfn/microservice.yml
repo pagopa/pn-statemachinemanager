@@ -104,6 +104,13 @@ Parameters:
     Type: Number
     Description: maximum autoscaling number of tasks
 
+  MountEfs:
+    Type: String
+    Default: false
+    AllowedValues:
+         - "true"
+         - "false"
+
 Resources:
 
   StateMachineManagerMicroservice:
@@ -135,6 +142,7 @@ Resources:
         MaxTasksNumber: !Ref MaxTasksNumber
         AutoscalingThreshold: !Ref AutoscalingThreshold
         EfsFilesystem: !Ref FargateEFSFileSystemID
+        MountEfs: !Ref MountEfs
 
   
   PnSmManagedPolicy:
