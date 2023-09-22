@@ -5,6 +5,8 @@ import it.pagopa.pn.statemachinemanager.model.Transaction;
 import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEnv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -122,17 +124,6 @@ class ApiControllerTest {
     }
 
     @Test
-    void getStatusTestEmptyClientId() {
-        var process = "INVIO_PEC";
-        var currStato = "SENT";
-        var clientId = "C050";
-        var nextStatus = "COMPOSED";
-        webClientTestCall(process, currStato, clientId, nextStatus)
-                .expectStatus()
-                .isOk();
-    }
-
-    @Test
     void getStatusTestKOProcessId() {
         var currStato = "BOOKED";
         var clientId = "C05";
@@ -162,6 +153,15 @@ class ApiControllerTest {
                 .isBadRequest();
     }
     @Test
+    void getStatusTestKOClientIdEmpty() {
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var nextStatus = "COMPOSED";
+        webClientTestCall(process, currStato, "", nextStatus)
+                .expectStatus()
+                .isNotFound();
+    }
+    @Test
     void getStatusTestKONextStatus() {
         var process = "PEC";
         var currStato = "BOOKED";
@@ -172,25 +172,21 @@ class ApiControllerTest {
     }
 
     @Test
-    void getStatusTestANY() {
-        var process = "INVIO_PEC";
+    void getStatusTestKONextStatusBlank() {
+        var process = "PEC";
         var currStato = "BOOKED";
-        var clientId = "C050";
-        var nextStatus = "INTERNAL_ERROR";
+        var clientId = "C05";
+        webClientTestCall(process, currStato, clientId, "")
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"INVIO_PEC, BOOKED, C050, INTERNAL_ERROR", "INVIO_PEC, SENT, \"\", INTERNAL_ERROR", "INVIO_PEC, SENT, C050, COMPOSED"})
+    void getStatusTestANYEmptyClientId(String process, String currStato, String clientId, String nextStatus) {
         webClientTestCall(process, currStato, clientId, nextStatus)
                      .expectStatus()
                      .isOk();
-    }
-
-    @Test
-    void getStatusTestANYEmptyClientId() {
-        var process = "INVIO_PEC";
-        var currStato = "SENT";
-        var clientId = "";
-        var nextStatus = "INTERNAL_ERROR";
-        webClientTestCall(process, currStato, clientId, nextStatus)
-                .expectStatus()
-                .isOk();
     }
 
     @Test
