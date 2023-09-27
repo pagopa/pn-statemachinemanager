@@ -1,5 +1,5 @@
 {
     "Parameters": {
-        "spring.task.execution.pool.max-size": "512"
+        "PnSmTaskExecutionPoolMaxSize": "250"
     }
 }

@@ -3,6 +3,6 @@
         "MinTasksNumber": "2",
         "MaxTasksNumber": "6",
         "AutoscalingThreshold": "17500",
-        "spring.task.execution.pool.max-size": "512"
+        "PnSmTaskExecutionPoolMaxSize": "250"
     }
 }
