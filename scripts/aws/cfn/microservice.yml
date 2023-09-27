@@ -100,6 +100,11 @@ Parameters:
     Type: Number
     Description: maximum autoscaling number of tasks
 
+  PnSmTaskExecutionPoolMaxSize:
+    Type: String
+    Description: 'SpringBoot configuration Task Execution Max Pool Siza'
+    Default: '250'
+
 Resources:
 
   StateMachineManagerMicroservice:
@@ -114,6 +119,7 @@ Resources:
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'PnSmTableClientStates=${PnSmTableNameClientStates}'
+        ContainerEnvEntry3: !Sub 'PnSmTaskExecutionPoolMaxSize=${PnSmTaskExecutionPoolMaxSize}'
         JavaToolOptions: '-XX:MaxMetaspaceSize=256m'
         MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
