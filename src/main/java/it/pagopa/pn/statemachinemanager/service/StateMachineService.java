@@ -69,10 +69,7 @@ public class StateMachineService {
                         break;
                     }
                     case 1: { // processId + clientId + anyStatus
-                        if (clientId.isEmpty()) {
-                            iCase = 2;
-                            continue;
-                        }
+
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
                         sLog=String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus);
