@@ -33,14 +33,8 @@ public class StateMachineService {
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
-        final String NEXT_STATUS = "nextStatus";
 
-        log.info("Checking {}", NEXT_STATUS);
-        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
-            log.warn("{} failed error = ErrorRequestValidateNotFoundNextStatus, {} ", NEXT_STATUS, nextStatus);
-            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
-        }
-        log.info("Checking {} passed", NEXT_STATUS);
+        checkNextStatus(nextStatus);
 
         Response resp = new Response();
         Transaction processClientId = new Transaction();
@@ -126,6 +120,16 @@ public class StateMachineService {
         }
     }
 
+
+    private void checkNextStatus(String nextStatus) throws StateMachineManagerException {
+        final String NEXT_STATUS = "nextStatus";
+        log.info("Checking {}", NEXT_STATUS);
+        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
+            log.warn("{} failed error = ErrorRequestValidateNotFoundNextStatus, {} ", NEXT_STATUS, nextStatus);
+            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
+        }
+        log.info("Checking {} passed", NEXT_STATUS);
+    }
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
 
         Transaction processClientId = new Transaction();
