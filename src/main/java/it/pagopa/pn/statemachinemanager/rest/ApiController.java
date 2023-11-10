@@ -5,6 +5,7 @@ import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import lombok.CustomLog;
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.*;
 import static it.pagopa.pn.statemachinemanager.constants.Constants.*;
 
@@ -26,17 +27,14 @@ public class ApiController {
             "clientId") String clientId, @RequestParam(value = "nextStatus") String nextStatus) {
 
         log.logStartingProcess(VALIDATE_STATUS);
-
         Response response = null;
-        try{
-            log.debug(VALIDATE_STATUS_LOG, VALIDATE_STATUS,process, status, clientId, nextStatus);
+        try {
             response = service.queryTable(process, status, clientId, nextStatus);
-            log.logEndingProcess(VALIDATE_STATUS);
-        }catch(StateMachineManagerException exception){
+        } catch (StateMachineManagerException exception) {
             log.logEndingProcess(VALIDATE_STATUS, false, exception.getMessage());
             throw exception;
         }
-
+        log.logEndingProcess(VALIDATE_STATUS);
         return response;
     }
 
@@ -45,18 +43,15 @@ public class ApiController {
                                                     @RequestParam(value = "clientId") String clientId) {
 
 
-        log.logStartingProcess(GET_EXTERNAL_STATUS);
-
+        log.logStartingProcess(GET_EXTERNAL_STATUS_PROCESS);
         ExternalStatusResponse externalStatusResponse = null;
-        try{
-            log.debug(EXTERNAL_STATUS_LOG,GET_EXTERNAL_STATUS, process, status, clientId);
+        try {
             externalStatusResponse = service.getExternalStatus(process, status, clientId);
-            log.logEndingProcess(GET_EXTERNAL_STATUS);
-        }catch (StateMachineManagerException exception){
+        } catch (StateMachineManagerException exception) {
             log.logEndingProcess(GET_EXTERNAL_STATUS, false, exception.getMessage());
             throw exception;
         }
-
+        log.logEndingProcess(GET_EXTERNAL_STATUS);
         return externalStatusResponse;
     }
 }

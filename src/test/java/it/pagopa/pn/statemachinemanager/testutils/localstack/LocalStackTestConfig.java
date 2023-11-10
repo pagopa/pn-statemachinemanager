@@ -2,7 +2,7 @@ package it.pagopa.pn.statemachinemanager.testutils.localstack;
 
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import it.pagopa.pn.statemachinemanager.testutils.exception.DynamoDbInitTableCreationException;
-import lombok.extern.slf4j.Slf4j;
+import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -25,7 +25,7 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 import static software.amazon.awssdk.services.dynamodb.model.TableStatus.ACTIVE;
 
 @TestConfiguration
-@Slf4j
+@CustomLog
 public class LocalStackTestConfig {
 
     static DockerImageName dockerImageName = DockerImageName.parse("localstack/localstack:1.0.4");
