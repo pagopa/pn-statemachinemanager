@@ -1,30 +1,32 @@
 package it.pagopa.pn.statemachinemanager.service;
 
+import it.pagopa.pn.commons.utils.dynamodb.sync.DynamoDbTableDecorator;
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
 import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
-import lombok.extern.slf4j.Slf4j;
+import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
-
 import java.util.Iterator;
+import java.util.stream.Stream;
+
+import static it.pagopa.pn.statemachinemanager.constants.Constants.*;
 
 @Service
-@Slf4j
+@CustomLog
 public class StateMachineService {
 
-    private final DynamoDbTable<Transaction> transactionTable;
+    private final DynamoDbTableDecorator<Transaction> transactionTable;
 
     public StateMachineService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
                                @Value("${pn.sm.table.transaction}") String pnSmTableTransaction) {
-        this.transactionTable = dynamoDbEnhancedClient.table(pnSmTableTransaction, TableSchema.fromBean(Transaction.class));
+        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(pnSmTableTransaction, TableSchema.fromBean(Transaction.class)));
     }
 
     private static final String SEPARATORE = "#";
@@ -35,6 +37,7 @@ public class StateMachineService {
 
 
         checkNextStatus(nextStatus);
+
 
         Response resp = new Response();
         Transaction processClientId = new Transaction();
@@ -131,6 +134,8 @@ public class StateMachineService {
         log.info("Checking {} passed", NEXT_STATUS);
     }
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
+
+        log.debug(INVOKING_OPERATION_LABEL_WITH_ARGS, GET_EXTERNAL_STATUS, Stream.of(processId, currStatus, clientId).toList());
 
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();

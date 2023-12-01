@@ -3,13 +3,14 @@ package it.pagopa.pn.statemachinemanager.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import java.net.URI;
+
+import static it.pagopa.pn.statemachinemanager.constants.Constants.DEFAULT_CREDENTIALS_PROVIDER;
 
 @Configuration
 public class AwsConfiguration {
@@ -22,7 +23,6 @@ public class AwsConfiguration {
     @Value("${test.aws.dynamodb.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
 
-    private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER = DefaultCredentialsProvider.create();
 
     @Bean
     public DynamoDbClient dynamoDbClient() {
