@@ -2,6 +2,7 @@
     "Parameters": {
         "MinTasksNumber": "2",
         "MaxTasksNumber": "6",
-        "AutoscalingThreshold": "17500"
+        "AutoscalingThreshold": "17500",
+        "PnSmTaskExecutionPoolMaxSize": "250"
     }
 }

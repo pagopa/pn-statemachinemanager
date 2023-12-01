@@ -1,3 +1,5 @@
 {
-    "Parameters": {}
+    "Parameters": {
+        "PnSmTaskExecutionPoolMaxSize": "250"
+    }
 }
