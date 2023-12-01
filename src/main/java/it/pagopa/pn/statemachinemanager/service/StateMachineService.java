@@ -35,15 +35,9 @@ public class StateMachineService {
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
-        log.debug(INVOKING_OPERATION_LABEL_WITH_ARGS, QUERY_TABLE, Stream.of(processId, currStatus, clientId, nextStatus).toList());
 
-        final String NEXT_STATUS = "nextStatus";
-        log.logChecking(NEXT_STATUS);
-        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
-            log.logCheckingOutcome(NEXT_STATUS, false, "Not Found nextStatus");
-            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
-        }
-        log.logCheckingOutcome(NEXT_STATUS, true);
+        checkNextStatus(nextStatus);
+
 
         Response resp = new Response();
         Transaction processClientId = new Transaction();
@@ -72,10 +66,7 @@ public class StateMachineService {
                         break;
                     }
                     case 1: { // processId + clientId + anyStatus
-                        if (clientId.isEmpty()) {
-                            iCase = 2;
-                            continue;
-                        }
+
                         processClientId.setProcessClientId(processId + SEPARATORE + clientId);
                         oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
                         sLog=String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus);
@@ -132,6 +123,16 @@ public class StateMachineService {
         }
     }
 
+
+    private void checkNextStatus(String nextStatus) throws StateMachineManagerException {
+        final String NEXT_STATUS = "nextStatus";
+        log.info("Checking {}", NEXT_STATUS);
+        if (nextStatus == null || nextStatus.isEmpty() || nextStatus.isBlank()) {
+            log.warn("{} failed error = ErrorRequestValidateNotFoundNextStatus, {} ", NEXT_STATUS, nextStatus);
+            throw new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus(nextStatus);
+        }
+        log.info("Checking {} passed", NEXT_STATUS);
+    }
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
 
         log.debug(INVOKING_OPERATION_LABEL_WITH_ARGS, GET_EXTERNAL_STATUS, Stream.of(processId, currStatus, clientId).toList());

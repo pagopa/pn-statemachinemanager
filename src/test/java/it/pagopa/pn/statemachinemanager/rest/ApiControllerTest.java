@@ -1,7 +1,7 @@
 package it.pagopa.pn.statemachinemanager.rest;
 
-import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
+import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEnv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,15 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTestWebEnv
@@ -31,6 +30,10 @@ class ApiControllerTest {
 
     @Autowired
     private DynamoDbEnhancedClient enhancedClient;
+
+    @Autowired
+    StateMachineService service = mock(StateMachineService.class);
+
 
     @Value("${pn.sm.table.transaction}")
     private String pnSmTableTransaction;
@@ -122,6 +125,7 @@ class ApiControllerTest {
                      .jsonPath("$.allowed")
                      .isEqualTo("false");
     }
+
 
     @Test
     void getStatusTestKOProcessId() {
@@ -227,5 +231,9 @@ class ApiControllerTest {
                      .expectStatus()
                      .isNotFound();
     }
+
+
+
+
 }
 
