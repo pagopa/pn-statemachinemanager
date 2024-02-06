@@ -31,6 +31,7 @@ public class StateMachineService {
 
     private static final String SEPARATORE = "#";
     private static final String ANY_STATUS = "_any_";
+    private static final String END_STATUS = "_end_";
     private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
     public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
@@ -93,14 +94,19 @@ public class StateMachineService {
                 if (results.hasNext()) {
                     notFound = false;
                     Transaction rec = results.next();
-                    if (rec.getTargetStatus().contains(nextStatus)) {
-                        log.debug("Valid transition: " + sLog);
-                        boAllowed = true;
+                   if(rec.getTargetStatus().contains(END_STATUS)){
+                        log.debug("End status reached: " + sLog);
                         break;
-                    } else if (rec.getTargetStatus().contains(ANY_STATUS)) {
-                        log.debug("to any transition: " + sLog);
-                        boAllowed = true;
-                        break;
+                    } else {
+                        if (rec.getTargetStatus().contains(nextStatus)) {
+                            log.debug("Valid transition: " + sLog);
+                            boAllowed = true;
+                            break;
+                        } else if (rec.getTargetStatus().contains(ANY_STATUS)) {
+                            log.debug("to any transition: " + sLog);
+                            boAllowed = true;
+                            break;
+                        }
                     }
                     log.debug("Invalid transition: " + sLog);
                 } else {
