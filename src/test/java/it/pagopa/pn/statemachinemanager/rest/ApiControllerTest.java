@@ -77,6 +77,17 @@ class ApiControllerTest {
 
             transactionDynamoDbTable.putItem(transaction);
 
+            List<String> list3 = new ArrayList<>();
+            list3.add("VALIDATE");
+            list3.add("_end_");
+
+            transaction = new Transaction();
+            transaction.setProcessClientId("INVIO_PEC#C051");
+            transaction.setCurrStatus("_any_");
+            transaction.setTargetStatus(list3);
+
+            transactionDynamoDbTable.putItem(transaction);
+
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -94,6 +105,18 @@ class ApiControllerTest {
                 .exchange();
     }
 
+    private WebTestClient.ResponseSpec webClientTestCallWithTargetStatus(String process, String currStato, String clientId, String nextStatus, List<String> targetStatus) {
+        return webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(URI)
+                        .queryParam("clientId", clientId)
+                        .queryParam("nextStatus", nextStatus)
+                        .queryParam("targetStatus", targetStatus)
+                        .build(process, currStato))
+                .accept(APPLICATION_JSON)
+                .exchange();
+    }
+
+
     @Test
     void getStatusTestAllowed() {
         var process = "INVIO_PEC";
@@ -106,6 +129,20 @@ class ApiControllerTest {
                      .expectBody()
                      .jsonPath("$.allowed")
                      .isEqualTo("true");
+    }
+
+    @Test
+    void getEndStatusTestNotAllowed() {
+        var process = "INVIO_PEC";
+        var currStato = "_any_";
+        var clientId = "C051";
+        var nextStatus = "VALIDATE";
+        webClientTestCall(process, currStato, clientId, nextStatus)
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.allowed")
+                .isEqualTo("false");
     }
 
     @Test
