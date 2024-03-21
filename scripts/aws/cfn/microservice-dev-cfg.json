@@ -3,6 +3,8 @@
         "MinTasksNumber": "2",
         "MaxTasksNumber": "6",
         "AutoscalingThreshold": "17500",
-        "PnSmTaskExecutionPoolMaxSize": "250"
+        "PnSmTaskExecutionPoolMaxSize": "250",
+        "CpuValue": "1024",
+        "MemoryAmount": "4GB"
     }
 }
