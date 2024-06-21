@@ -30,6 +30,7 @@ public class StateMachineService {
     }
 
     private static final String SEPARATORE = "#";
+    private static final String START_STATUS = "_start_";
     private static final String ANY_STATUS = "_any_";
     private static final String END_STATUS = "_end_";
     private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
@@ -102,7 +103,7 @@ public class StateMachineService {
                             log.debug("Valid transition: " + sLog);
                             boAllowed = true;
                             break;
-                        } else if (rec.getTargetStatus().contains(ANY_STATUS)) {
+                        } else if (rec.getTargetStatus().contains(ANY_STATUS) && !rec.getCurrStatus().equals(START_STATUS)) {
                             log.debug("to any transition: " + sLog);
                             boAllowed = true;
                             break;
