@@ -103,7 +103,7 @@ public class StateMachineService {
                             log.debug("Valid transition: " + sLog);
                             boAllowed = true;
                             break;
-                        } else if (rec.getTargetStatus().contains(ANY_STATUS) && !rec.getCurrStatus().equals(START_STATUS)) {
+                        } else if (rec.getTargetStatus().contains(ANY_STATUS) && !currStatus.equals(START_STATUS)) {
                             log.debug("to any transition: " + sLog);
                             boAllowed = true;
                             break;
