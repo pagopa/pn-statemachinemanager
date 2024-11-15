@@ -38,7 +38,7 @@ class ApiControllerTest {
     @Value("${pn.sm.table.transaction}")
     private String pnSmTableTransaction;
 
-    private final String URI = "/statemachinemanager/validate/{process}/{currStato}";
+    private final String Uri = "/statemachinemanager/validate/{process}/{currStato}";
     @BeforeEach
     void setUp() {
         try {
@@ -97,7 +97,7 @@ class ApiControllerTest {
 
     private WebTestClient.ResponseSpec webClientTestCall(String process, String currStato, String clientId, String nextStatus) {
         return webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(URI)
+                .uri(uriBuilder -> uriBuilder.path(Uri)
                         .queryParam("clientId", clientId)
                         .queryParam("nextStatus", nextStatus)
                         .build(process, currStato))
