@@ -105,17 +105,6 @@ class ApiControllerTest {
                 .exchange();
     }
 
-    private WebTestClient.ResponseSpec webClientTestCallWithTargetStatus(String process, String currStato, String clientId, String nextStatus, List<String> targetStatus) {
-        return webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(URI)
-                        .queryParam("clientId", clientId)
-                        .queryParam("nextStatus", nextStatus)
-                        .queryParam("targetStatus", targetStatus)
-                        .build(process, currStato))
-                .accept(APPLICATION_JSON)
-                .exchange();
-    }
-
 
     @Test
     void getStatusTestAllowed() {
