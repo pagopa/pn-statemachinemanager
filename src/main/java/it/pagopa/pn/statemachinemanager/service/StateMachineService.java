@@ -13,7 +13,10 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static it.pagopa.pn.statemachinemanager.constants.Constants.*;
@@ -34,98 +37,110 @@ public class StateMachineService {
     private static final String END_STATUS = "_end_";
     private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
-    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
-
-
+    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException {
         checkNextStatus(nextStatus);
 
-
         Response resp = new Response();
-        Transaction processClientId = new Transaction();
 
         try {
+            List<QueryConfig> queryConfigs = buildQueryConfigs(processId, currStatus, clientId, nextStatus);
+
             boolean notFound = true;
             boolean boAllowed = false;
 
-            int iCase = 0;
+            for (QueryConfig config : queryConfigs) {
+                Key oKey = config.getKey();
+                String sLog = config.getLogMessage();
 
-            Key oKey;
-            QueryConditional queryConditional;
-            Iterator<Transaction> results;
-
-            String sLog;
-            while (iCase < 4) {
-                switch (iCase) {
-                    case 0: { // processId + clientId + currStatus
-                        if (clientId.isEmpty()) {
-                            iCase = 2;
-                            continue;
-                        }
-                        processClientId.setProcessClientId(processId + SEPARATORE + clientId);
-                        oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog=String.format(S_LOG_DEF, processId, clientId, currStatus, nextStatus);
-                        break;
-                    }
-                    case 1: { // processId + clientId + anyStatus
-
-                        processClientId.setProcessClientId(processId + SEPARATORE + clientId);
-                        oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog=String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus);
-                        break;
-                    }
-                    case 2: { // processId + currStatus
-                        processClientId.setProcessClientId(processId);
-                        oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(currStatus).build();
-                        sLog=String.format(S_LOG_DEF, processId, "", currStatus, nextStatus);
-                        break;
-                    }
-                    case 3: { // processId + anyStatus
-                        processClientId.setProcessClientId(processId);
-                        oKey = Key.builder().partitionValue(processClientId.getProcessClientId()).sortValue(ANY_STATUS).build();
-                        sLog=String.format(S_LOG_DEF, processId, "", ANY_STATUS, nextStatus);
-                        break;
-                    }
-                    default:
-                        throw new IllegalArgumentException("Unexpected value: " + iCase);
-                }
-                queryConditional = QueryConditional.keyEqualTo(oKey);
-                results = transactionTable.query(queryConditional).items().iterator();
+                QueryConditional queryConditional = QueryConditional.keyEqualTo(oKey);
+                Iterator<Transaction> results = transactionTable.query(queryConditional).items().iterator();
 
                 if (results.hasNext()) {
                     notFound = false;
                     Transaction rec = results.next();
-                   if(rec.getTargetStatus().contains(END_STATUS)){
+
+                    if (rec.getTargetStatus().contains(END_STATUS)) {
                         log.debug("End status reached: " + sLog);
                         break;
-                    } else {
-                        if (rec.getTargetStatus().contains(nextStatus)) {
-                            log.debug("Valid transition: " + sLog);
-                            boAllowed = true;
-                            break;
-                        } else if (rec.getTargetStatus().contains(ANY_STATUS)) {
-                            log.debug("to any transition: " + sLog);
-                            boAllowed = true;
-                            break;
-                        }
                     }
+
+                    if (rec.getTargetStatus().contains(nextStatus) || rec.getTargetStatus().contains(ANY_STATUS)) {
+                        log.debug("Valid transition: " + sLog);
+                        boAllowed = true;
+                        break;
+                    }
+
                     log.debug("Invalid transition: " + sLog);
                 } else {
                     log.debug("Item not found: " + sLog);
                 }
-                iCase++;
             }
 
             if (notFound) {
                 throw new StateMachineManagerException.ErrorRequestValidateNotFoundCurrentStatus(currStatus);
             }
-            resp.setAllowed(boAllowed);
 
+            resp.setAllowed(boAllowed);
             return resp;
 
         } catch (DynamoDbException e) {
             log.error("DynamoDbException in queryTable method {}", e.getMessage());
             System.exit(1);
             return resp;
+        }
+    }
+
+    private List<QueryConfig> buildQueryConfigs(String processId, String currStatus, String clientId, String nextStatus) {
+        List<QueryConfig> configs = new ArrayList<>();
+
+        if (!clientId.isEmpty()) {
+            configs.add(new QueryConfig(
+                    Key.builder()
+                            .partitionValue(processId + SEPARATORE + clientId)
+                            .sortValue(currStatus).build(),
+                    String.format(S_LOG_DEF, processId, clientId, currStatus, nextStatus)
+            ));
+
+            configs.add(new QueryConfig(
+                    Key.builder()
+                            .partitionValue(processId + SEPARATORE + clientId)
+                            .sortValue(ANY_STATUS).build(),
+                    String.format(S_LOG_DEF, processId, clientId, ANY_STATUS, nextStatus)
+            ));
+        }
+
+        configs.add(new QueryConfig(
+                Key.builder()
+                        .partitionValue(processId)
+                        .sortValue(currStatus).build(),
+                String.format(S_LOG_DEF, processId, "", currStatus, nextStatus)
+        ));
+
+        configs.add(new QueryConfig(
+                Key.builder()
+                        .partitionValue(processId)
+                        .sortValue(ANY_STATUS).build(),
+                String.format(S_LOG_DEF, processId, "", ANY_STATUS, nextStatus)
+        ));
+
+        return configs;
+    }
+
+    private static class QueryConfig {
+        private final Key key;
+        private final String logMessage;
+
+        public QueryConfig(Key key, String logMessage) {
+            this.key = key;
+            this.logMessage = logMessage;
+        }
+
+        public Key getKey() {
+            return key;
+        }
+
+        public String getLogMessage() {
+            return logMessage;
         }
     }
 
