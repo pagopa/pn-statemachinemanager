@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.util.Map;
 
 import static java.util.Map.entry;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
 import static software.amazon.awssdk.services.dynamodb.model.TableStatus.ACTIVE;
 
@@ -29,13 +30,14 @@ import static software.amazon.awssdk.services.dynamodb.model.TableStatus.ACTIVE;
 public class LocalStackTestConfig {
 
     static DockerImageName dockerImageName = DockerImageName.parse("localstack/localstack:1.0.4");
-    static LocalStackContainer localStackContainer = new LocalStackContainer(dockerImageName).withServices(DYNAMODB);
+    static LocalStackContainer localStackContainer = new LocalStackContainer(dockerImageName).withServices(DYNAMODB, CLOUDWATCH);
 
 
     static {
         localStackContainer.start();
 
         System.setProperty("pn.sm.table.transaction", "Transaction");
+        System.setProperty("test.aws.cloudwatch.endpoint", String.valueOf(localStackContainer.getEndpointOverride(CLOUDWATCH)));
         System.setProperty("test.aws.dynamodb.endpoint", String.valueOf(localStackContainer.getEndpointOverride(DYNAMODB)));
     }
 
