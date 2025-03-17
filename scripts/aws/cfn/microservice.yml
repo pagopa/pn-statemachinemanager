@@ -196,6 +196,12 @@ Resources:
               - 'dynamodb:List*'
             Resource:
               - !Sub "${PnSmTableArnClientStates}"
+          - Sid: 'CloudWatchPutMetricData'
+            Effect: Allow
+            Action:
+              - 'cloudwatch:PutMetricData'
+            Resource:
+              - '*'
 
 
   StateMachineManagerMicroserviceAlarm:
