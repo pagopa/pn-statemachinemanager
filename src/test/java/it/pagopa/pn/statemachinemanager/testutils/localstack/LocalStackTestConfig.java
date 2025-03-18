@@ -1,39 +1,50 @@
 package it.pagopa.pn.statemachinemanager.testutils.localstack;
 
-import it.pagopa.pn.statemachinemanager.model.Transaction;
-import it.pagopa.pn.statemachinemanager.testutils.exception.DynamoDbInitTableCreationException;
 import lombok.CustomLog;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-import software.amazon.awssdk.core.internal.waiters.ResponseOrException;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
-import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
-import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
-import javax.annotation.PostConstruct;
-import java.util.Map;
+import java.io.IOException;
 
 import static java.util.Map.entry;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
-import static software.amazon.awssdk.services.dynamodb.model.TableStatus.ACTIVE;
+
 
 @TestConfiguration
 @CustomLog
 public class LocalStackTestConfig {
 
+    static LocalStackContainer localStack =
+            new LocalStackContainer(DockerImageName.parse("localstack/localstack:1.0.4"))
+                    .withServices(LocalStackContainer.Service.DYNAMODB)
+                    .withClasspathResourceMapping("testcontainers/init.sh",
+                            "/docker-entrypoint-initaws.d/make-storages.sh", BindMode.READ_ONLY)
+                    .withClasspathResourceMapping("testcontainers/credentials",
+                            "/root/.aws/credentials", BindMode.READ_ONLY)
+                    .withNetworkAliases("localstack")
+                    .withNetwork(Network.builder().build())
+                    .waitingFor(Wait.forLogMessage(".*Initialization terminated.*", 1));
     static DockerImageName dockerImageName = DockerImageName.parse("localstack/localstack:1.0.4");
     static LocalStackContainer localStackContainer = new LocalStackContainer(dockerImageName).withServices(DYNAMODB, CLOUDWATCH);
 
 
     static {
+        localStack.start();
+        System.setProperty("aws.endpoint-url", localStack.getEndpointOverride(DYNAMODB).toString());
+        System.setProperty("pn.sm.table.transaction", "pn-SmStates");
+        System.setProperty("test.aws.cloudwatch.endpoint", String.valueOf(localStackContainer.getEndpointOverride(CLOUDWATCH)));
+        System.setProperty("test.aws.dynamodb.endpoint", String.valueOf(localStack.getEndpointOverride(DYNAMODB)));
+        try {
+            System.setProperty("aws.sharedCredentialsFile", new ClassPathResource("testcontainers/credentials").getFile().getAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         localStackContainer.start();
 
         System.setProperty("pn.sm.table.transaction", "Transaction");
@@ -76,13 +87,6 @@ public class LocalStackTestConfig {
         });
     }
 
-    private void createTable(final String tableName, final Class<?> entityClass) {
-        DynamoDbTable<?> dynamoDbTable = dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(entityClass));
-        dynamoDbTable.createTable(builder -> builder.provisionedThroughput(b -> b.readCapacityUnits(5L).writeCapacityUnits(5L).build()));
-
-        // La creazione delle tabelle su Dynamo è asincrona. Bisogna aspettare tramite il DynamoDbWaiter
-        ResponseOrException<DescribeTableResponse> responseOrException =
-                dynamoDbWaiter.waitUntilTableExists(builder -> builder.tableName(tableName).build()).matched();
-        responseOrException.response().orElseThrow(() -> new DynamoDbInitTableCreationException(tableName));
     }
+
 }
