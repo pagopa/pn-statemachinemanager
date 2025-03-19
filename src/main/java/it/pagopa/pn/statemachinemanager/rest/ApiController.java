@@ -5,7 +5,6 @@ import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import lombok.CustomLog;
-import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.*;
 import static it.pagopa.pn.statemachinemanager.constants.Constants.*;
 
