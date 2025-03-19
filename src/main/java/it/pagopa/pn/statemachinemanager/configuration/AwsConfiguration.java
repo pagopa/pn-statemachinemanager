@@ -3,8 +3,11 @@ package it.pagopa.pn.statemachinemanager.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClientBuilder;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
@@ -22,6 +25,11 @@ public class AwsConfiguration {
 
     @Value("${test.aws.dynamodb.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
+    @Value("${test.aws.cloudwatch.endpoint:#{null}}")
+    String cloudwatchLocalStackEndpoint;
+
+    private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER_V2 = DefaultCredentialsProvider.create();
+
 
 
     @Bean
@@ -43,5 +51,18 @@ public class AwsConfiguration {
     @Bean
     public DynamoDbWaiter getDynamoDbWaiter(DynamoDbClient dynamoDbClient) {
         return DynamoDbWaiter.builder().client(dynamoDbClient).build();
+    }
+
+    @Bean
+    public CloudWatchAsyncClient cloudWatchAsyncClient() {
+        CloudWatchAsyncClientBuilder cloudWatchAsyncClientBuilder = CloudWatchAsyncClient.builder()
+                .credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER_V2)
+                .region(Region.of(awsRegion));
+
+        if (cloudwatchLocalStackEndpoint != null) {
+            cloudWatchAsyncClientBuilder.endpointOverride(URI.create(cloudwatchLocalStackEndpoint));
+        }
+
+        return cloudWatchAsyncClientBuilder.build();
     }
 }
