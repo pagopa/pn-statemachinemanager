@@ -5,6 +5,9 @@
         "AutoscalingThreshold": "17500",
         "PnSmTaskExecutionPoolMaxSize": "250",
         "CpuValue": "1024",
-        "MemoryAmount": "4GB"
+        "MemoryAmount": "4GB",
+        "MountEfs": "false",
+        "PnCronAnalyzer": "* */1 * * * *",
+        "WireTapLogActivation": "false"
     }
 }

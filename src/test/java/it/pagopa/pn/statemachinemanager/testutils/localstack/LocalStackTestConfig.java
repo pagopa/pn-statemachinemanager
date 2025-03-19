@@ -11,16 +11,16 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
 
 
 @TestConfiguration
 @CustomLog
 public class LocalStackTestConfig {
-
     static LocalStackContainer localStack =
             new LocalStackContainer(DockerImageName.parse("localstack/localstack:1.0.4"))
-                    .withServices(LocalStackContainer.Service.DYNAMODB)
+                    .withServices(LocalStackContainer.Service.DYNAMODB, LocalStackContainer.Service.CLOUDWATCH)
                     .withClasspathResourceMapping("testcontainers/init.sh",
                             "/docker-entrypoint-initaws.d/make-storages.sh", BindMode.READ_ONLY)
                     .withClasspathResourceMapping("testcontainers/credentials",
@@ -32,6 +32,7 @@ public class LocalStackTestConfig {
     static {
         localStack.start();
         System.setProperty("aws.endpoint-url", localStack.getEndpointOverride(DYNAMODB).toString());
+        System.setProperty("test.aws.cloudwatch.endpoint", String.valueOf(localStack.getEndpointOverride(CLOUDWATCH)));
         System.setProperty("pn.sm.table.transaction", "pn-SmStates");
         System.setProperty("test.aws.dynamodb.endpoint", String.valueOf(localStack.getEndpointOverride(DYNAMODB)));
         try {
