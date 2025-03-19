@@ -88,6 +88,16 @@ class ApiControllerTest {
 
             transactionDynamoDbTable.putItem(transaction);
 
+            List<String> list4 = new ArrayList<>();
+            list4.add("_any_");
+
+            transaction = new Transaction();
+            transaction.setProcessClientId("INVIO_PEC#C052");
+            transaction.setCurrStatus("BOOKED");
+            transaction.setTargetStatus(list4);
+
+            transactionDynamoDbTable.putItem(transaction);
+
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -129,6 +139,20 @@ class ApiControllerTest {
                      .expectBody()
                      .jsonPath("$.allowed")
                      .isEqualTo("true");
+    }
+
+    @Test
+    void getStatusToAnyTransition(){
+        var process = "INVIO_PEC";
+        var currStato = "BOOKED";
+        var clientId = "C052";
+        var nextStatus = "VALIDATE";
+        webClientTestCall(process, currStato, clientId, nextStatus)
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.allowed")
+                .isEqualTo("true");
     }
 
     @Test
