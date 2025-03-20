@@ -7,16 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.http.ResponseEntity;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTestWebEnv
 @AutoConfigureWebTestClient
-public class StateMachineManagerRestErrorHandlerTest {
+class StateMachineManagerRestErrorHandlerTest {
 
     @Test
     void handleRequestClientIdMalformedValidateClientIdTest() {
         StateMachineManagerException.ErrorRequestValidateClientId exception = new StateMachineManagerException.ErrorRequestValidateClientId("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestClientIdMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 400);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(400);
     }
 
     @Test
@@ -24,7 +26,7 @@ public class StateMachineManagerRestErrorHandlerTest {
         StateMachineManagerException.ErrorRequestValidateNotFoundClientId exception = new StateMachineManagerException.ErrorRequestValidateNotFoundClientId("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestClientIdMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 400);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(400);
     }
 
     @Test
@@ -32,7 +34,7 @@ public class StateMachineManagerRestErrorHandlerTest {
         StateMachineManagerException.ErrorRequestValidateCurrentStatus exception = new StateMachineManagerException.ErrorRequestValidateCurrentStatus("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestCurrentStatusMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 400);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(400);
     }
 
     @Test
@@ -40,7 +42,7 @@ public class StateMachineManagerRestErrorHandlerTest {
         StateMachineManagerException.ErrorRequestValidateProcessId exception = new StateMachineManagerException.ErrorRequestValidateProcessId("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestProcessIdMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 400);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(400);
 
     }
 
@@ -49,7 +51,7 @@ public class StateMachineManagerRestErrorHandlerTest {
         StateMachineManagerException.ErrorRequestValidateNextStatus exception = new StateMachineManagerException.ErrorRequestValidateNextStatus("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestNextStatusMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 400);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(400);
     }
 
     @Test
@@ -57,6 +59,6 @@ public class StateMachineManagerRestErrorHandlerTest {
         StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus exception = new StateMachineManagerException.ErrorRequestValidateNotFoundNextStatus("test");
         StateMachineManagerRestErrorHandler stateMachineManagerRestErrorHandler = new StateMachineManagerRestErrorHandler();
         ResponseEntity<Problem> responseEntity = stateMachineManagerRestErrorHandler.handleRequestNextStatusMalformed(exception);
-        assert (responseEntity.getStatusCodeValue() == 404);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(404);
     }
 }
