@@ -115,6 +115,32 @@ Parameters:
     Default: '2GB'
     Description: Memory amount reserved to the task pod.
     AllowedValues: [ 2GB, 4GB, 6GB, 8GB ]
+  # EFS parameters
+  FargateEFSFileSystemID:
+    Type: String
+    Description: "EFS Filesystem"
+
+  MountEfs:
+    Type: String
+    Default: false
+    AllowedValues:
+      - "true"
+      - "false"
+
+  # Logging parameters
+  WireTapLogActivation:
+    Type: String
+    Default: false
+    Description: Activation of wire logs
+    AllowedValues:
+      - true
+      - false
+
+  PnCronAnalyzer:
+    Type: String
+    Default: '-'
+    Description: Cron for which you send the metric to CloudWatch
+
 
 Resources:
 
@@ -131,6 +157,8 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'PnSmTableClientStates=${PnSmTableNameClientStates}'
         ContainerEnvEntry3: !Sub 'PnSmTaskExecutionPoolMaxSize=${PnSmTaskExecutionPoolMaxSize}'
+        ContainerEnvEntry4: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
+        ContainerEnvEntry5: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
         JavaToolOptions: '-XX:MaxMetaspaceSize=256m'
         MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
@@ -147,7 +175,9 @@ Resources:
         MinTasksNumber: !Ref MinTasksNumber
         MaxTasksNumber: !Ref MaxTasksNumber
         AutoscalingThreshold: !Ref AutoscalingThreshold
-
+        EfsFilesystem: !Ref FargateEFSFileSystemID
+        MountEfs: !Ref MountEfs
+        WireTapLogActivation: !Ref WireTapLogActivation
   
   PnSmManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -166,6 +196,12 @@ Resources:
               - 'dynamodb:List*'
             Resource:
               - !Sub "${PnSmTableArnClientStates}"
+          - Sid: 'CloudWatchPutMetricData'
+            Effect: Allow
+            Action:
+              - 'cloudwatch:PutMetricData'
+            Resource:
+              - '*'
 
 
   StateMachineManagerMicroserviceAlarm:

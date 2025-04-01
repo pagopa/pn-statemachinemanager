@@ -1,0 +1,5 @@
+"process","clientId","currStatus","nextStatus","allowed"
+"SS","","booked","available","true"
+"SS","","booked","attached","false"
+"SS","","available","attached","true"
+"SS","","deleted","available","false"

@@ -38,7 +38,7 @@ class ApiControllerTest {
     @Value("${pn.sm.table.transaction}")
     private String pnSmTableTransaction;
 
-    private final String URI = "/statemachinemanager/validate/{process}/{currStato}";
+    private final String uri = "/statemachinemanager/validate/{process}/{currStato}";
     @BeforeEach
     void setUp() {
         try {
@@ -88,6 +88,16 @@ class ApiControllerTest {
 
             transactionDynamoDbTable.putItem(transaction);
 
+            List<String> list4 = new ArrayList<>();
+            list4.add("_any_");
+
+            transaction = new Transaction();
+            transaction.setProcessClientId("INVIO_PEC#C052");
+            transaction.setCurrStatus("BOOKED");
+            transaction.setTargetStatus(list4);
+
+            transactionDynamoDbTable.putItem(transaction);
+
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -97,7 +107,7 @@ class ApiControllerTest {
 
     private WebTestClient.ResponseSpec webClientTestCall(String process, String currStato, String clientId, String nextStatus) {
         return webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(URI)
+                .uri(uriBuilder -> uriBuilder.path(uri)
                         .queryParam("clientId", clientId)
                         .queryParam("nextStatus", nextStatus)
                         .build(process, currStato))
@@ -105,44 +115,51 @@ class ApiControllerTest {
                 .exchange();
     }
 
-    private WebTestClient.ResponseSpec webClientTestCallWithTargetStatus(String process, String currStato, String clientId, String nextStatus, List<String> targetStatus) {
-        return webTestClient.get()
-                .uri(uriBuilder -> uriBuilder.path(URI)
-                        .queryParam("clientId", clientId)
-                        .queryParam("nextStatus", nextStatus)
-                        .queryParam("targetStatus", targetStatus)
-                        .build(process, currStato))
-                .accept(APPLICATION_JSON)
-                .exchange();
-    }
-
-
-    @Test
-    void getStatusTestAllowed() {
-        var process = "INVIO_PEC";
-        var currStato = "BOOKED";
-        var clientId = "C050";
-        var nextStatus = "VALIDATE";
-        webClientTestCall(process, currStato, clientId, nextStatus)
-                     .expectStatus()
-                     .isOk()
-                     .expectBody()
-                     .jsonPath("$.allowed")
-                     .isEqualTo("true");
-    }
-
-    @Test
-    void getEndStatusTestNotAllowed() {
-        var process = "INVIO_PEC";
-        var currStato = "_any_";
-        var clientId = "C051";
-        var nextStatus = "VALIDATE";
-        webClientTestCall(process, currStato, clientId, nextStatus)
+    @ParameterizedTest
+    @CsvSource({
+            "INVIO_PEC, BOOKED, C050, VALIDATE, true",
+            "INVIO_PEC, BOOKED, C052, VALIDATE, true",
+            "INVIO_PEC, _any_, C051, VALIDATE, false",
+    })
+    void getStatusTestOk(String process, String currStatus, String clientId, String nextStatus, String expected) {
+        webClientTestCall(process, currStatus, clientId, nextStatus)
                 .expectStatus()
                 .isOk()
                 .expectBody()
                 .jsonPath("$.allowed")
-                .isEqualTo("false");
+                .isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "NULL,BOOKED,C05,COMPOSED",
+            "PEC,NULL,C05,COMPOSED",
+            "INVIO_PEC,BOOKED,EMPTY,COMPOSED",
+            "PEC,BOOKED,C05,EMPTY",
+    })
+    void getStatusTestNotFound(String process, String currStatus,String clientId,String nextStatus) {
+        process = convertCsvValue(process);
+        currStatus = convertCsvValue(currStatus);
+        clientId = convertCsvValue(clientId);
+        nextStatus = convertCsvValue(nextStatus);
+        webClientTestCall(process, currStatus, clientId, nextStatus)
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "INVIO_PEC, BOOKED, NULL, COMPOSED",
+            "PEC, BOOKED, C05, NULL",
+    })
+    void getStatusTestBadRequest(String process, String currStatus,String clientId,String nextStatus) {
+        process = convertCsvValue(process);
+        currStatus = convertCsvValue(currStatus);
+        clientId = convertCsvValue(clientId);
+        nextStatus = convertCsvValue(nextStatus);
+        webClientTestCall(process, currStatus, clientId, nextStatus)
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
@@ -161,65 +178,6 @@ class ApiControllerTest {
                      .expectBody()
                      .jsonPath("$.allowed")
                      .isEqualTo("false");
-    }
-
-
-    @Test
-    void getStatusTestKOProcessId() {
-        var currStato = "BOOKED";
-        var clientId = "C05";
-        var nextStatus = "COMPOSED";
-        webClientTestCall(null, currStato, clientId, nextStatus)
-                     .expectStatus()
-                     .isNotFound();
-    }
-
-    @Test
-    void getStatusTestKOCurrentStatus() {
-        var process = "PEC";
-        var clientId = "C05";
-        var nextStatus = "COMPOSED";
-        webClientTestCall(process, null, clientId, nextStatus)
-                     .expectStatus()
-                     .isNotFound();
-    }
-
-    @Test
-    void getStatusTestKOClientId() {
-        var process = "INVIO_PEC";
-        var currStato = "BOOKED";
-        var nextStatus = "COMPOSED";
-        webClientTestCall(process, currStato, null, nextStatus)
-                .expectStatus()
-                .isBadRequest();
-    }
-    @Test
-    void getStatusTestKOClientIdEmpty() {
-        var process = "INVIO_PEC";
-        var currStato = "BOOKED";
-        var nextStatus = "COMPOSED";
-        webClientTestCall(process, currStato, "", nextStatus)
-                .expectStatus()
-                .isNotFound();
-    }
-    @Test
-    void getStatusTestKONextStatus() {
-        var process = "PEC";
-        var currStato = "BOOKED";
-        var clientId = "C05";
-        webClientTestCall(process, currStato, clientId, null)
-                .expectStatus()
-                .isBadRequest();
-    }
-
-    @Test
-    void getStatusTestKONextStatusBlank() {
-        var process = "PEC";
-        var currStato = "BOOKED";
-        var clientId = "C05";
-        webClientTestCall(process, currStato, clientId, "")
-                .expectStatus()
-                .isNotFound();
     }
 
     @ParameterizedTest
@@ -269,8 +227,11 @@ class ApiControllerTest {
                      .isNotFound();
     }
 
-
-
+    private String convertCsvValue(String value) {
+        value = "NULL".equals(value) ? null : value;
+        value = "EMPTY".equals(value) ? "" : value;
+        return value;
+    }
 
 }
 
