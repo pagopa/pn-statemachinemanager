@@ -99,7 +99,7 @@ public class StateMachineService {
                         break;
                     } else {
                         if (rec.getTargetStatus().contains(nextStatus)) {
-                            log.debug("Valid transition: " + sLog);
+                            log.info("Valid transition: " + sLog);
                             boAllowed = true;
                             break;
                         } else if (rec.getTargetStatus().contains(ANY_STATUS)) {
@@ -108,7 +108,7 @@ public class StateMachineService {
                             break;
                         }
                     }
-                    log.debug("Invalid transition: " + sLog);
+                    log.info("Invalid transition: " + sLog);
                 } else {
                     log.debug("Item not found: " + sLog);
                 }
@@ -141,7 +141,7 @@ public class StateMachineService {
     }
     public ExternalStatusResponse getExternalStatus(String processId, String currStatus, String clientId) {
 
-        log.debug(INVOKING_OPERATION_LABEL_WITH_ARGS, GET_EXTERNAL_STATUS, Stream.of(processId, currStatus, clientId).toList());
+        log.info(INVOKING_OPERATION_LABEL_WITH_ARGS, GET_EXTERNAL_STATUS, Stream.of(processId, currStatus, clientId).toList());
 
         Transaction processClientId = new Transaction();
         ExternalStatusResponse resp = new ExternalStatusResponse();
