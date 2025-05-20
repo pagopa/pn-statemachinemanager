@@ -6,9 +6,10 @@ start_time=$(date +%s)
 
 ## CONFIGURATION ##
 VERBOSE=true
-AWS_REGION="eu-south-1"
+AWS_REGION="us-east-1"
 LOCALSTACK_ENDPOINT="http://localhost:4566"
 DYNAMODB_ENDPOINT=$LOCALSTACK_ENDPOINT
+AWS_PROFILE="default"
 
 ## DEFINITIONS ##
 DYNAMODB_TABLES=(
@@ -48,6 +49,7 @@ create_table() {
     log "Creating table: $table_name (PK: $pk, SK: $sk)"
 
     if ! aws dynamodb describe-table --table-name "$table_name" \
+                                   --profile "$AWS_PROFILE" \
                                    --endpoint-url "$DYNAMODB_ENDPOINT" \
                                    --region $AWS_REGION > /dev/null 2>&1; then
         aws dynamodb create-table --table-name "$table_name" \
