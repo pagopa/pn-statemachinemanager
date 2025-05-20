@@ -6,7 +6,9 @@ import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEn
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @SpringBootTestWebEnv
 @AutoConfigureWebTestClient
 public class StateMachineManagerRestErrorHandlerTest {

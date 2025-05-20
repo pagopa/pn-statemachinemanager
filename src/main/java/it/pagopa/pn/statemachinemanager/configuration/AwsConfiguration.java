@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClientBuilder;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
+
 import java.net.URI;
 
 import static it.pagopa.pn.statemachinemanager.constants.Constants.DEFAULT_CREDENTIALS_PROVIDER;
@@ -20,25 +21,32 @@ public class AwsConfiguration {
 
 //  Set in LocalStackTestConfig
 
-    @Value("${aws.region-code}")
-    String awsRegion;
+    @Value("${test.aws.region-code:#{null}}")
+    String regionCode;
 
     @Value("${test.aws.dynamodb.endpoint:#{null}}")
     String dynamoDbLocalStackEndpoint;
+
     @Value("${test.aws.cloudwatch.endpoint:#{null}}")
     String cloudwatchLocalStackEndpoint;
+
+
 
     private static final DefaultCredentialsProvider DEFAULT_CREDENTIALS_PROVIDER_V2 = DefaultCredentialsProvider.create();
 
 
-
     @Bean
     public DynamoDbClient dynamoDbClient() {
-        var dynamoDbClientBuilder = DynamoDbClient.builder().region(Region.of(awsRegion)).credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER);
+        var dynamoDbClientBuilder = DynamoDbClient.builder().credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER);
 
         if (dynamoDbLocalStackEndpoint != null) {
             dynamoDbClientBuilder.endpointOverride(URI.create(dynamoDbLocalStackEndpoint));
         }
+        if(regionCode != null) {
+            dynamoDbClientBuilder.region(Region.of(regionCode));
+        }
+
+
 
         return dynamoDbClientBuilder.build();
     }
@@ -56,11 +64,15 @@ public class AwsConfiguration {
     @Bean
     public CloudWatchAsyncClient cloudWatchAsyncClient() {
         CloudWatchAsyncClientBuilder cloudWatchAsyncClientBuilder = CloudWatchAsyncClient.builder()
-                .credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER_V2)
-                .region(Region.of(awsRegion));
+                .credentialsProvider(DEFAULT_CREDENTIALS_PROVIDER_V2);
+
 
         if (cloudwatchLocalStackEndpoint != null) {
             cloudWatchAsyncClientBuilder.endpointOverride(URI.create(cloudwatchLocalStackEndpoint));
+        }
+
+        if(regionCode != null) {
+            cloudWatchAsyncClientBuilder.region(Region.of(regionCode));
         }
 
         return cloudWatchAsyncClientBuilder.build();
