@@ -91,6 +91,13 @@
             <artifactId>localstack</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Transitive dependency fo localstack -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.12.266</version>  <!-- AGGIUNGI VERSIONE -->
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
