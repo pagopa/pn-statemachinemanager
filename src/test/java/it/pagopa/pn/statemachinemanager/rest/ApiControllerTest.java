@@ -1,5 +1,6 @@
 package it.pagopa.pn.statemachinemanager.rest;
 
+import it.pagopa.pn.statemachinemanager.configuration.PnStateMachineManagerConfig;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEnv;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -36,14 +36,14 @@ class ApiControllerTest {
     StateMachineService service = mock(StateMachineService.class);
 
 
-    @Value("${pn.sm.table.transaction}")
-    private String pnSmTableTransaction;
+    @Autowired
+    private PnStateMachineManagerConfig pnStateMachineManagerConfig;
 
     private final String uri = "/statemachinemanager/validate/{process}/{currStato}";
     @BeforeEach
     void setUp() {
         try {
-            var transactionDynamoDbTable = enhancedClient.table(pnSmTableTransaction, TableSchema.fromBean(Transaction.class));
+            var transactionDynamoDbTable = enhancedClient.table(pnStateMachineManagerConfig.getTable().getTransaction(), TableSchema.fromBean(Transaction.class));
 
             // Populate the Table.
             List<String> list = new ArrayList<>();
