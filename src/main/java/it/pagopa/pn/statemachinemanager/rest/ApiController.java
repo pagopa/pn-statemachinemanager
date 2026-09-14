@@ -30,7 +30,7 @@ public class ApiController {
         try {
             response = service.queryTable(process, status, clientId, nextStatus);
         } catch (StateMachineManagerException exception) {
-            log.logEndingProcess(VALIDATE_STATUS, false, exception.getMessage());
+            log.logEndingProcess(VALIDATE_STATUS, false, exception.getMessage(), exception);
             throw exception;
         }
         log.logEndingProcess(VALIDATE_STATUS);
@@ -47,7 +47,7 @@ public class ApiController {
         try {
             externalStatusResponse = service.getExternalStatus(process, status, clientId);
         } catch (StateMachineManagerException exception) {
-            log.logEndingProcess(GET_EXTERNAL_STATUS, false, exception.getMessage());
+            log.logEndingProcess(GET_EXTERNAL_STATUS, false, exception.getMessage(), exception);
             throw exception;
         }
         log.logEndingProcess(GET_EXTERNAL_STATUS);
