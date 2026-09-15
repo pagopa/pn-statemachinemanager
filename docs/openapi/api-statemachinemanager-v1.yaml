@@ -1,0 +1,136 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI servizi ad uso solo interno
+  x-api-id: api-private
+  x-summary: OpenAPI servizi ad uso solo interno
+  description: >-
+    API accessibili solo da microservizi interni
+  version: '1.0.0'
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: 'https://da-definire/'
+servers:
+  - url: https://api.pn.pagopa.it
+    description: Generated server url
+paths:
+  /statemachinemanager/validate/{process}/{status}:
+    get:
+      summary: Valida una transizione di stato
+      description: >-
+        Verifica se la transizione dallo stato corrente allo stato successivo indicato
+        è ammessa per il processo (ed eventualmente il client) indicati.
+      tags:
+        - state-machine-controller
+      operationId: validateStatus
+      parameters:
+        - in: path
+          name: process
+          description: Identificativo del processo
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: status
+          description: Stato corrente
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: clientId
+          description: Identificativo del client
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: nextStatus
+          description: Stato successivo di cui validare la transizione
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateStatusResponse'
+        '400':
+          description: >-
+            Parametro obbligatorio assente. Risposta prodotta dal framework:
+            il corpo non è contrattualizzato.
+        '404':
+          description: Stato corrente non trovato per il processo/client indicato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /statemachinemanager/decodeLogical/{process}/{status}:
+    get:
+      summary: Decodifica lo stato logico ed esterno
+      description: >-
+        Restituisce lo stato esterno e lo stato logico associati allo stato corrente
+        per il processo (ed eventualmente il client) indicati.
+      tags:
+        - state-machine-controller
+      operationId: getExternalStatus
+      parameters:
+        - in: path
+          name: process
+          description: Identificativo del processo
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: status
+          description: Stato corrente
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: clientId
+          description: Identificativo del client
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalStatusResponse'
+        '400':
+          description: >-
+            Parametro obbligatorio assente. Risposta prodotta dal framework:
+            il corpo non è contrattualizzato.
+        '404':
+          description: Stato corrente non trovato per il processo/client indicato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  schemas:
+    ValidateStatusResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+          description: Indica se la transizione richiesta è ammessa
+    ExternalStatusResponse:
+      type: object
+      properties:
+        externalStatus:
+          type: string
+          description: Stato esterno associato allo stato corrente
+        logicStatus:
+          type: string
+          description: Stato logico associato allo stato corrente
+    Problem:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Descrizione leggibile dell'errore

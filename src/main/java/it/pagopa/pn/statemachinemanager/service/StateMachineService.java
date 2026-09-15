@@ -2,8 +2,8 @@ package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.commons.utils.dynamodb.sync.DynamoDbTableDecorator;
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
-import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
-import it.pagopa.pn.statemachinemanager.model.Response;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ExternalStatusResponse;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ValidateStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import lombok.CustomLog;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,13 +35,13 @@ public class StateMachineService {
     private static final String END_STATUS = "_end_";
     private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
-    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
+    public ValidateStatusResponse queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
 
         checkNextStatus(nextStatus);
 
 
-        Response resp = new Response();
+        ValidateStatusResponse resp = new ValidateStatusResponse();
         Transaction processClientId = new Transaction();
 
         try {
