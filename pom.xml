@@ -143,7 +143,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <inputSpec>${project.basedir}/docs/openapi/api-statemachinemanager-v1.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/docs/openapi/pn-statemachinemanager-private.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <generateApiDocumentation>false</generateApiDocumentation>
