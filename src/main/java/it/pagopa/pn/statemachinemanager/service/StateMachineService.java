@@ -1,12 +1,12 @@
 package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.commons.utils.dynamodb.sync.DynamoDbTableDecorator;
+import it.pagopa.pn.statemachinemanager.configuration.PnStateMachineManagerConfig;
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
 import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Response;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import lombok.CustomLog;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -25,8 +25,8 @@ public class StateMachineService {
     private final DynamoDbTableDecorator<Transaction> transactionTable;
 
     public StateMachineService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
-                               @Value("${pn.sm.table.transaction}") String pnSmTableTransaction) {
-        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(pnSmTableTransaction, TableSchema.fromBean(Transaction.class)));
+                               PnStateMachineManagerConfig pnStateMachineManagerConfig) {
+        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(pnStateMachineManagerConfig.getTable().getTransaction(), TableSchema.fromBean(Transaction.class)));
     }
 
     private static final String SEPARATORE = "#";
