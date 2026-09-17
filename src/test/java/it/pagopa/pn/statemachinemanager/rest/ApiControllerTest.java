@@ -1,13 +1,19 @@
 package it.pagopa.pn.statemachinemanager.rest;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import it.pagopa.pn.statemachinemanager.configuration.PnStateMachineManagerConfig;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import it.pagopa.pn.statemachinemanager.service.StateMachineService;
 import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEnv;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,6 +25,7 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 @ActiveProfiles("test")
@@ -40,6 +47,27 @@ class ApiControllerTest {
     private PnStateMachineManagerConfig pnStateMachineManagerConfig;
 
     private final String uri = "/statemachinemanager/validate/{process}/{currStato}";
+
+    private Logger serverAspectLogger;
+    private Level originalServerAspectLogLevel;
+    private ListAppender<ILoggingEvent> serverAspectLogAppender;
+
+    @BeforeEach
+    void attachServerAspectLogCapture() {
+        serverAspectLogger = (Logger) LoggerFactory.getLogger("it.pagopa.pn.commons.utils.ServerAspectLogging");
+        originalServerAspectLogLevel = serverAspectLogger.getLevel();
+        serverAspectLogger.setLevel(Level.DEBUG);
+        serverAspectLogAppender = new ListAppender<>();
+        serverAspectLogAppender.start();
+        serverAspectLogger.addAppender(serverAspectLogAppender);
+    }
+
+    @AfterEach
+    void detachServerAspectLogCapture() {
+        serverAspectLogger.detachAppender(serverAspectLogAppender);
+        serverAspectLogger.setLevel(originalServerAspectLogLevel);
+    }
+
     @BeforeEach
     void setUp() {
         try {
@@ -226,6 +254,29 @@ class ApiControllerTest {
                      .exchange()
                      .expectStatus()
                      .isNotFound();
+    }
+
+    @Test
+    void serverAspectLoggingTracksCallWithoutLeakingQueryParamsAndWithoutDuplicates() {
+        var clientId = "C050";
+        var nextStatus = "VALIDATE";
+
+        webClientTestCall("INVIO_PEC", "BOOKED", clientId, nextStatus)
+                .expectStatus().isOk();
+
+        List<String> messages = serverAspectLogAppender.list.stream()
+                .map(ILoggingEvent::getFormattedMessage)
+                .toList();
+
+        assertThat(messages)
+                .as("l'aspect di piattaforma deve produrre esattamente una coppia Starting/Ending per chiamata")
+                .filteredOn(m -> m.contains("Starting")).hasSize(1);
+        assertThat(messages)
+                .as("l'aspect di piattaforma deve produrre esattamente una coppia Starting/Ending per chiamata")
+                .filteredOn(m -> m.contains("Ending")).hasSize(1);
+        assertThat(messages)
+                .as("clientId e nextStatus sono @RequestParam: non devono comparire nei log automatici")
+                .noneMatch(m -> m.contains(clientId) || m.contains(nextStatus));
     }
 
     private String convertCsvValue(String value) {
