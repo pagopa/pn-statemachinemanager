@@ -52,8 +52,7 @@ class ApiControllerTest {
     private Level originalServerAspectLogLevel;
     private ListAppender<ILoggingEvent> serverAspectLogAppender;
 
-    @BeforeEach
-    void attachServerAspectLogCapture() {
+    private void attachServerAspectLogCapture() {
         serverAspectLogger = (Logger) LoggerFactory.getLogger("it.pagopa.pn.commons.utils.ServerAspectLogging");
         originalServerAspectLogLevel = serverAspectLogger.getLevel();
         serverAspectLogger.setLevel(Level.DEBUG);
@@ -132,6 +131,8 @@ class ApiControllerTest {
             System.exit(1);
         }
         System.out.println("Customer data added to the table with id id101");
+
+        attachServerAspectLogCapture();
     }
 
     private WebTestClient.ResponseSpec webClientTestCall(String process, String currStato, String clientId, String nextStatus) {
