@@ -2,7 +2,7 @@ package it.pagopa.pn.statemachinemanager.rest.error;
 
 
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
-import it.pagopa.pn.statemachinemanager.model.Problem;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.Problem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,7 +1,7 @@
 package it.pagopa.pn.statemachinemanager.rest.error;
 
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
-import it.pagopa.pn.statemachinemanager.model.Problem;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.Problem;
 import it.pagopa.pn.statemachinemanager.testutils.annotation.SpringBootTestWebEnv;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
