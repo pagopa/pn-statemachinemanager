@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 @Import({SharedAutoConfiguration.class})
 public class PnStateMachineManagerConfig {
 
-    private Table table;
+    private Table table = new Table();
 
     @Data
     public static class Table {
@@ -24,6 +24,6 @@ public class PnStateMachineManagerConfig {
 
     @PostConstruct
     public void init() {
-        log.info("Configs: {}", this);
+        log.debug("Configs loaded: table.transaction={}", table != null ? table.getTransaction() : null);
     }
 }

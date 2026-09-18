@@ -26,7 +26,13 @@ public class StateMachineService {
 
     public StateMachineService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
                                PnStateMachineManagerConfig pnStateMachineManagerConfig) {
-        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(pnStateMachineManagerConfig.getTable().getTransaction(), TableSchema.fromBean(Transaction.class)));
+        String tableName = pnStateMachineManagerConfig.getTable() != null
+                ? pnStateMachineManagerConfig.getTable().getTransaction()
+                : null;
+        if (tableName == null || tableName.isBlank()) {
+            throw new IllegalStateException("Missing required configuration property: pn.sm.table.transaction");
+        }
+        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(Transaction.class)));
     }
 
     private static final String SEPARATORE = "#";

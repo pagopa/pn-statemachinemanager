@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class ApiController implements StateMachineControllerApi {
@@ -23,12 +24,14 @@ public class ApiController implements StateMachineControllerApi {
     @Override
     public Mono<ResponseEntity<ValidateStatusResponse>> validateStatus(String process, String status, String clientId, String nextStatus, final ServerWebExchange exchange) {
         return Mono.fromCallable(() -> service.queryTable(process, status, clientId, nextStatus))
+                .subscribeOn(Schedulers.boundedElastic())
                 .map(ResponseEntity::ok);
     }
 
     @Override
     public Mono<ResponseEntity<ExternalStatusResponse>> getExternalStatus(String process, String status, String clientId, final ServerWebExchange exchange) {
         return Mono.fromCallable(() -> service.getExternalStatus(process, status, clientId))
+                .subscribeOn(Schedulers.boundedElastic())
                 .map(ResponseEntity::ok);
     }
 }
