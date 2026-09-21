@@ -145,6 +145,15 @@ Parameters:
     Default: '-'
     Description: Cron for which you send the metric to CloudWatch
 
+  CpuArchitecture:
+    Type: String
+    Default: 'ARM'
+    Description: CPU architecture for the Fargate tasks
+
+  JavaToolOptions:
+    Type: String
+    Default: '-XX:MaxMetaspaceSize=256m'
+    Description: Java tool options for the Fargate tasks
 
 Resources:
 
@@ -163,7 +172,8 @@ Resources:
         ContainerEnvEntry3: !Sub 'PnSmTaskExecutionPoolMaxSize=${PnSmTaskExecutionPoolMaxSize}'
         ContainerEnvEntry4: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry5: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
-        JavaToolOptions: '-XX:MaxMetaspaceSize=256m'
+        JavaToolOptions: !Ref JavaToolOptions
+        CpuArchitecture: !Ref CpuArchitecture
         MappedPaths: '/statemachinemanager/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
