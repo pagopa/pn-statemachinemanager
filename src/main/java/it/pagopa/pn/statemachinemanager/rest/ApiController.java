@@ -1,18 +1,17 @@
 package it.pagopa.pn.statemachinemanager.rest;
 
-import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
-import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
-import it.pagopa.pn.statemachinemanager.model.Response;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.api.StateMachineControllerApi;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ExternalStatusResponse;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ValidateStatusResponse;
 import it.pagopa.pn.statemachinemanager.service.StateMachineService;
-import lombok.CustomLog;
-import org.springframework.web.bind.annotation.*;
-import static it.pagopa.pn.statemachinemanager.constants.Constants.*;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
-@CustomLog
-@RequestMapping("/statemachinemanager")
-public class ApiController {
+public class ApiController implements StateMachineControllerApi {
 
 
     private final StateMachineService service;
@@ -21,36 +20,18 @@ public class ApiController {
     public ApiController(StateMachineService service) {
         this.service = service;
     }
-    @GetMapping(path = "/validate/{process}/{status}")
-    public Response validateStatus(@PathVariable("process") String process, @PathVariable("status") String status, @RequestParam(value =
-            "clientId") String clientId, @RequestParam(value = "nextStatus") String nextStatus) {
 
-        log.logStartingProcess(VALIDATE_STATUS);
-        Response response = null;
-        try {
-            response = service.queryTable(process, status, clientId, nextStatus);
-        } catch (StateMachineManagerException exception) {
-            log.logEndingProcess(VALIDATE_STATUS, false, exception.getMessage());
-            throw exception;
-        }
-        log.logEndingProcess(VALIDATE_STATUS);
-        return response;
+    @Override
+    public Mono<ResponseEntity<ValidateStatusResponse>> validateStatus(String process, String status, String clientId, String nextStatus, final ServerWebExchange exchange) {
+        return Mono.fromCallable(() -> service.queryTable(process, status, clientId, nextStatus))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(ResponseEntity::ok);
     }
 
-    @GetMapping(path = "/decodeLogical/{process}/{status}")
-    public ExternalStatusResponse getExternalStatus(@PathVariable("process") String process, @PathVariable("status") String status,
-                                                    @RequestParam(value = "clientId") String clientId) {
-
-
-        log.logStartingProcess(GET_EXTERNAL_STATUS_PROCESS);
-        ExternalStatusResponse externalStatusResponse = null;
-        try {
-            externalStatusResponse = service.getExternalStatus(process, status, clientId);
-        } catch (StateMachineManagerException exception) {
-            log.logEndingProcess(GET_EXTERNAL_STATUS, false, exception.getMessage());
-            throw exception;
-        }
-        log.logEndingProcess(GET_EXTERNAL_STATUS);
-        return externalStatusResponse;
+    @Override
+    public Mono<ResponseEntity<ExternalStatusResponse>> getExternalStatus(String process, String status, String clientId, final ServerWebExchange exchange) {
+        return Mono.fromCallable(() -> service.getExternalStatus(process, status, clientId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(ResponseEntity::ok);
     }
 }

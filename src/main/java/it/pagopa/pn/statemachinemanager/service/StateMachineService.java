@@ -1,12 +1,12 @@
 package it.pagopa.pn.statemachinemanager.service;
 
 import it.pagopa.pn.commons.utils.dynamodb.sync.DynamoDbTableDecorator;
+import it.pagopa.pn.statemachinemanager.configuration.PnStateMachineManagerConfig;
 import it.pagopa.pn.statemachinemanager.exception.StateMachineManagerException;
-import it.pagopa.pn.statemachinemanager.model.ExternalStatusResponse;
-import it.pagopa.pn.statemachinemanager.model.Response;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ExternalStatusResponse;
+import it.pagopa.pn.statemachinemanager.generated.openapi.server.v1.dto.ValidateStatusResponse;
 import it.pagopa.pn.statemachinemanager.model.Transaction;
 import lombok.CustomLog;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -25,8 +25,14 @@ public class StateMachineService {
     private final DynamoDbTableDecorator<Transaction> transactionTable;
 
     public StateMachineService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
-                               @Value("${pn.sm.table.transaction}") String pnSmTableTransaction) {
-        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(pnSmTableTransaction, TableSchema.fromBean(Transaction.class)));
+                               PnStateMachineManagerConfig pnStateMachineManagerConfig) {
+        String tableName = pnStateMachineManagerConfig.getTable() != null
+                ? pnStateMachineManagerConfig.getTable().getTransaction()
+                : null;
+        if (tableName == null || tableName.isBlank()) {
+            throw new IllegalStateException("Missing required configuration property: pn.sm.table.transaction");
+        }
+        this.transactionTable = new DynamoDbTableDecorator<>(dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(Transaction.class)));
     }
 
     private static final String SEPARATORE = "#";
@@ -35,13 +41,13 @@ public class StateMachineService {
     private static final String END_STATUS = "_end_";
     private static final String S_LOG_DEF = "Validate - processId = %s, clientId = %s, currStatus = %s, nextStatus = %s";
 
-    public Response queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
+    public ValidateStatusResponse queryTable(String processId, String currStatus, String clientId, String nextStatus) throws StateMachineManagerException{
 
 
         checkNextStatus(nextStatus);
 
 
-        Response resp = new Response();
+        ValidateStatusResponse resp = new ValidateStatusResponse();
         Transaction processClientId = new Transaction();
 
         try {
