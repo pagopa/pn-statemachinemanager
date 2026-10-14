@@ -12,7 +12,7 @@
     </parent>
     <groupId>it.pagopa.pn.statemachinemanager</groupId>
     <artifactId>pn-statemachinemanager</artifactId>
-    <version>3.0.0-RC.1</version>
+    <version>3.0.0</version>
     <name>pn-statemachinemanager</name>
     <description>State machine manager µService</description>
     <scm>
